@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08080b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BASMA!">
+<meta name="format-detection" content="telephone=no">
+<meta name="description" content="BASMA! Kırmızı-siyah tek buton oyunu. 100 aşama, karma soru havuzu, ters köşe mantık görevleri ve tek hak.">
+<title>BASMA! | Tek buton, bin tuzak — v1.5</title>
+<style>
+:root{color-scheme:dark;--red:#ff2649;--redhot:#ff5264;--ink:#fff7f8;--muted:#9b919b;--dim:#706973;--panel:#151116;--line:#35202a;--ring:clamp(270px,80vw,354px);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box}html,body{min-height:100%;margin:0}body{background:radial-gradient(ellipse 74% 36% at 50% 44%,#4b0d1c75 0%,#19091068 47%,transparent 84%),linear-gradient(155deg,#100e12,#060508 70%);color:var(--ink);overscroll-behavior:none}
+body:before{content:"";position:fixed;inset:0;opacity:.15;pointer-events:none;background-image:linear-gradient(#fff2 1px,transparent 1px),linear-gradient(90deg,#fff2 1px,transparent 1px);background-size:37px 37px;mask-image:linear-gradient(#0005,transparent 90%)}
+button{font:inherit}button:focus-visible{outline:2px solid #fff;outline-offset:4px}button[hidden],[hidden]{display:none!important}
+.app{max-width:490px;min-height:100svh;margin:auto;padding:calc(14px + env(safe-area-inset-top)) 18px calc(15px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:13px;position:relative;z-index:1}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.logo{line-height:1;letter-spacing:-1.4px;font-size:33px;font-weight:1000}.logo b{color:var(--red);font-weight:1000}.eyebrow{font-size:9px;letter-spacing:2.5px;font-weight:900;color:#b6a2ac;margin-top:6px}.tools{display:flex;gap:7px}.tool{width:39px;height:39px;border:1px solid #553140;color:#e7d7dc;background:#1c131a;border-radius:12px;font-size:17px;cursor:pointer}.tool:hover{background:#30202a}
+.scoreboard{display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:8px}.stat{background:linear-gradient(145deg,#21141cbb,#100d13da);border:1px solid #442631;border-radius:14px;padding:10px 7px;text-align:center}.stat-label{font-size:10px;letter-spacing:1.25px;color:#be9aa6;font-weight:900}.stat-value{font-size:22px;font-weight:1000;font-variant-numeric:tabular-nums;margin-top:3px}.hearts{font-size:19px;letter-spacing:1px;color:var(--redhot);white-space:nowrap}
+.round-panel{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:388px}.round-top{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:1.6px;color:#a18e99;font-weight:900}.level-mark{color:#fff;background:#b21836;border:1px solid #ff3e5e;border-radius:7px;padding:5px 7px}.phase{font-size:10px;text-transform:uppercase;color:#ff8fa3;letter-spacing:1.9px;font-weight:900}.question{font-size:clamp(16px,4.15vw,20px);font-weight:950;line-height:1.28;text-align:center;max-width:395px;min-height:49px;display:flex;justify-content:center;align-items:center;letter-spacing:-.3px;text-wrap:balance}
+.wheel{width:var(--ring);height:var(--ring);position:relative;display:grid;place-items:center;flex:none;isolation:isolate;filter:drop-shadow(0 0 23px #f000351c)}.wheel:before{content:"";position:absolute;inset:8.5%;border:1px solid #ef375a45;border-radius:50%;box-shadow:0 0 48px #ec124324,inset 0 0 30px #ff264911}.wheel:after{content:"";position:absolute;inset:4%;border-radius:50%;border:1px dashed #83273a57;pointer-events:none}
+.segment{position:absolute;left:50%;top:50%;width:calc(var(--ring)*.042);height:calc(var(--ring)*.091);margin-left:calc(var(--ring)*-.021);margin-top:calc(var(--ring)*-.0455);border-radius:4px;background:#32151f;border:1px solid #48202c;opacity:.45;transition:background .07s,opacity .07s}.segment.lit{opacity:1;background:linear-gradient(#ff6a7a,#e00d36);border-color:#ff6277;box-shadow:0 0 8px #ff164b8c}
+.central{inset:17%;position:absolute;border-radius:50%;border:2px solid #d42a4b;background:radial-gradient(circle at 38% 23%,#481423,#210c16 63%,#110911);box-shadow:inset 0 8px 25px #ff527020,inset 0 -15px 28px #000b,0 7px 18px #000c,0 0 25px #ff19402a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;padding:15px;overflow:hidden;transition:background .12s,transform .1s,border-color .12s}.central:before{content:"";inset:9px;position:absolute;border:1px solid #e56a8059;border-radius:50%;pointer-events:none}.central:after{content:"";position:absolute;width:69%;height:19%;bottom:12%;border-bottom:3px solid #ff3357;border-radius:0 0 50% 50%;filter:drop-shadow(0 0 6px #ff3559);pointer-events:none}.central.pressed{transform:scale(.958)}.central.ready{background:radial-gradient(circle at 40% 25%,#a61c37,#4b1024 64%,#220b15);border-color:#ff576c;box-shadow:inset 0 5px 25px #ff617434,0 0 28px #ff2a5070}.central.dark{background:radial-gradient(circle at 42% 26%,#25202a,#110e16 80%);border-color:#66545d}.central.dark:after{border-color:#836570;filter:none}
+.visual{display:flex;align-items:center;justify-content:center;flex-direction:column;min-height:80px;max-width:100%;position:relative;z-index:1;text-align:center;line-height:1.12;font-size:clamp(31px,9vw,45px);font-weight:1000;overflow-wrap:anywhere;text-shadow:0 0 15px #fff4;pointer-events:none}.visual.compact{font-size:clamp(21px,6vw,29px)}.visual.small{font-size:clamp(17px,5vw,24px)}.visual svg{width:min(106px,25vw);height:min(106px,25vw);filter:drop-shadow(0 0 14px #ff28463c)}.visual .dots{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;max-width:164px}.visual .dot{width:21px;height:21px;border:1px solid #726c74;border-radius:50%;background:#a69ea6}.visual .dot.hot{background:#ff2547;border-color:#ff92a4;box-shadow:0 0 11px #fa23487e}.visual .row-icons{max-width:170px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;font-size:37px}.visual .glow-word{letter-spacing:.5px;font-size:.78em}.visual .equation{white-space:nowrap;font-size:.93em}.center-sub{position:relative;z-index:1;color:#f4a2b1;font-size:10px;font-weight:900;letter-spacing:1.2px;min-height:13px;text-align:center;pointer-events:none}.instruction{text-align:center;color:#aa9ba5;font-size:12px;min-height:22px;line-height:1.35;max-width:350px}.instruction b{color:#fa889f}.feedback{font-weight:950;color:#ff899e;font-size:13px;min-height:20px;text-align:center}.feedback.good{color:#e8e1e5}
+.bottom{display:flex;flex-direction:column;gap:9px}.timer-label{display:flex;justify-content:space-between;align-items:center;letter-spacing:1.4px;font-size:10px;font-weight:900;color:#c4a3b0}.timer-label b{color:#f64a65;font-size:13px;font-variant-numeric:tabular-nums}.bar{background:#39232d;border-radius:20px;height:8px;overflow:hidden}.bar>div{height:100%;width:100%;transform-origin:left;background:linear-gradient(90deg,#c20d31,#ff6573);box-shadow:0 0 9px #ff234f;transition:transform .05s linear}.bottom-note{font-size:11px;color:#817780;text-align:center;line-height:1.55}.bottom-note strong{color:#bbaab2}
+.shade{position:fixed;z-index:50;inset:0;background:#050407df;backdrop-filter:blur(12px);display:grid;place-items:center;padding:22px}.modal{width:min(100%,400px);padding:27px 23px 23px;text-align:center;border:1px solid #743042;background:radial-gradient(ellipse at 50% 0%,#5c152a80,#1f101a 43%,#100c12 100%);box-shadow:0 24px 100px #000e,0 0 40px #cf15331b;border-radius:25px;max-height:min(90svh,700px);overflow:auto}.modal-emblem{width:78px;height:78px;display:grid;place-items:center;margin:0 auto 12px;border:1px solid #f35a73;border-radius:50%;background:radial-gradient(#5d182d,#270d1b);font-size:40px;box-shadow:0 0 30px #f526493c}.modal h1{font-size:clamp(30px,9vw,41px);font-weight:1000;letter-spacing:-1.5px;margin:6px 0}.modal h1 span{color:var(--red)}.modal p{font-size:13px;color:#cab5bf;line-height:1.65;margin:9px 0 16px}.pill{font-size:10px;color:#ff9eb0;border:1px solid #713043;background:#29111d;display:inline-block;letter-spacing:1.7px;border-radius:8px;padding:7px 10px;font-weight:900}.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:19px 0}.feature{border:1px solid #512738;border-radius:12px;background:#170e16;padding:10px 5px;font-size:11px;color:#bdaab3}.feature strong{display:block;color:#ff7189;font-size:12px;margin-bottom:4px}.btn-primary{border:0;width:100%;padding:15px 18px;border-radius:14px;font-weight:1000;font-size:16px;color:#fff;background:linear-gradient(135deg,#fc395b,#c90b35);box-shadow:0 8px 30px #fa1f4659;cursor:pointer}.btn-primary:active{transform:scale(.985)}.btn-secondary{color:#c7a3b3;background:transparent;border:0;text-decoration:underline;font-size:13px;margin-top:13px;cursor:pointer}.end-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:18px 0}.end-grid>div{border:1px solid #572335;border-radius:13px;padding:13px 9px;background:#190d16}.end-grid b{display:block;color:#ff738b;font-size:26px}.end-grid span{color:#9d8e99;font-size:10px;letter-spacing:.7px}.explain{border:1px solid #653046;border-radius:12px;background:#2b101d;padding:12px;margin-bottom:13px;font-size:12px;color:#ffd4de;line-height:1.5}
+.damage{pointer-events:none;position:fixed;inset:0;z-index:20;opacity:0;background:radial-gradient(ellipse at 50% 50%,transparent 26%,#f0003580 72%,#d00036c9);mix-blend-mode:screen}.damage.active{animation:damage .82s cubic-bezier(.19,.96,.54,.99)}.crack{position:absolute;inset:1%;opacity:0;z-index:4;pointer-events:none;background:linear-gradient(132deg,transparent 43%,#fff5 43.4%,#6c091d 43.9%,transparent 44.4%),linear-gradient(48deg,transparent 54%,#fff6 54.4%,#960c29 54.8%,transparent 55.1%),linear-gradient(104deg,transparent 51%,#fbd0d8 51.2%,transparent 51.8%);clip-path:polygon(20% 0%,72% 0%,100% 41%,80% 100%,9% 94%,0% 33%)}.crack.show{animation:crack .9s ease-out forwards}.wheel.bad-hit{animation:damage-shake .56s cubic-bezier(.14,.75,.38,.98)}.wheel.good-hit{animation:good-pop .35s ease}.particle{position:absolute;left:50%;top:50%;width:8px;height:13px;background:#ff4a67;pointer-events:none;z-index:9;box-shadow:0 0 14px #f00;animation:scatter .82s forwards;transform:translate(-50%,-50%)}.pop-label{position:fixed;z-index:22;left:50%;top:45%;transform:translate(-50%,-50%);font-size:clamp(28px,10vw,58px);font-weight:1000;white-space:nowrap;color:white;text-shadow:0 0 10px #ff1749,0 0 30px #ff1749,0 5px 0 #8b0824;pointer-events:none;animation:pop-error .85s ease both}
+@keyframes damage{0%,100%{opacity:0}13%,31%,53%{opacity:1}23%,45%{opacity:.12}75%{opacity:.55}}
+@keyframes damage-shake{0%,100%{transform:translate(0,0) rotate(0)}12%{transform:translate(-12px,5px) rotate(-3deg)}26%{transform:translate(10px,-7px) rotate(2deg)}43%{transform:translate(-9px,5px) rotate(-2deg)}64%{transform:translate(7px,-3px) rotate(1deg)}80%{transform:translate(-3px,2px)}}
+@keyframes crack{0%{opacity:0;transform:scale(.8)}18%,77%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.15)}}
+@keyframes scatter{to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) rotate(var(--rot));opacity:0}}
+@keyframes good-pop{50%{transform:scale(1.045);filter:brightness(1.2)}}
+@keyframes pop-error{0%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}18%,60%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-80%) scale(.95)}}
+@media(max-height:760px){:root{--ring:clamp(248px,72vw,315px)}.app{gap:7px;padding-top:10px}.round-panel{min-height:305px;gap:5px}.question{min-height:38px;font-size:16px}.stat{padding:7px}.bottom{gap:6px}.round-top{font-size:9px}}
+@media(max-width:345px){:root{--ring:265px}.app{padding-left:10px;padding-right:10px}.logo{font-size:29px}.modal{padding:18px}.stat-value{font-size:20px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}.damage.active{opacity:.45}.crack.show{opacity:.65}.particle{display:none}.pop-label{display:none}}
+
+/* V3 readable prompt and one-chance HUD */
+.question{width:min(100%,430px);padding:13px 16px;min-height:75px;background:linear-gradient(135deg,#30111f,#170d16);border:1.5px solid #d43854;border-radius:17px;box-shadow:0 0 24px #fa254329,inset 0 0 20px #f32c3d0a;font-size:clamp(19px,4.9vw,24px);line-height:1.17;text-shadow:0 2px 12px #000;font-weight:1000;letter-spacing:.1px;text-wrap:balance}
+.instruction{min-height:39px;width:min(100%,410px);padding:9px 14px;border:1px solid #693142;border-radius:12px;background:#22121c;color:#ffe2e9;font-size:clamp(13px,3.3vw,15px);font-weight:740;line-height:1.35}
+.center-sub{color:#ffe2e7;font-size:12px;letter-spacing:.7px;text-shadow:0 2px 7px #000}
+.round-panel{gap:9px}.round-top{font-size:12px}.phase{font-size:12px}.stat-label{font-size:11px}.stat-value.hearts{font-size:25px;line-height:1}
+.visual.small{font-size:clamp(19px,5.5vw,27px)}
+.bottom-note{font-size:12px}.round-panel .feedback{font-size:15px}
+@media(max-height:730px){.question{min-height:56px;padding:8px 10px;font-size:clamp(17px,4.6vw,22px)}.instruction{padding:6px 9px;font-size:13px;min-height:33px}.round-panel{gap:5px}}
+@media(max-height:650px){:root{--ring:clamp(220px,65vw,280px)}.top .eyebrow{display:none}.app{gap:6px}.stat{padding:6px}.round-panel{min-height:260px}.question{font-size:17px}}
+/* Obvious 360-degree explosion: expanding shockwaves, flame core, fragments and giant message */
+.explosion{position:fixed;inset:0;z-index:40;display:none;pointer-events:none;overflow:hidden;isolation:isolate}
+.explosion.show{display:block}
+.explosion .blast-flash{position:absolute;inset:0;background:#fff3b8;opacity:0;animation:blast-flash .95s ease-out both}
+.explosion .explosion-center{position:absolute;left:50%;top:49%;height:40vmin;width:40vmin;transform:translate(-50%,-50%) scale(.15);border-radius:50%;background:radial-gradient(circle,#fff 0 9%,#fffdb3 16%,#ffcc42 33%,#ff3b19 62%,#c1042b 81%,transparent 100%);box-shadow:0 0 80px 27px #ff5d0e,0 0 190px 90px #d200369e;animation:explode-sphere 1.2s cubic-bezier(.1,.84,.3,1) both}
+.explosion .shock{position:absolute;left:50%;top:49%;width:26vmin;height:26vmin;border:12px solid #ffbd47;border-radius:50%;transform:translate(-50%,-50%) scale(.2);box-shadow:0 0 35px #ffbc57,0 0 100px #fd2248,inset 0 0 40px #ff3939;animation:shockwave 1.5s ease-out both}
+.explosion .shock.two{border-color:#f63b3b;animation-delay:.13s;animation-duration:1.55s}
+.explosion .blast-symbol{position:absolute;left:50%;top:49%;font-size:clamp(42px,10vw,75px);font-weight:1000;letter-spacing:-2px;color:white;white-space:nowrap;text-shadow:0 0 22px #ff3a19,0 0 52px #fe1200,0 5px 0 #77011c;animation:boom-text 1.95s ease both}
+.explosion .blast-part{position:absolute;left:50%;top:49%;z-index:3;border-radius:37%;background:var(--flame,#ffa426);box-shadow:0 0 16px 4px var(--flame,#ffa426);opacity:0;animation:particle-boom var(--life,1.55s) cubic-bezier(.06,.65,.23,1) forwards}
+.explosion .blast-ray{position:absolute;left:50%;top:49%;z-index:1;width:var(--ray-width,6px);height:var(--ray-length,110px);background:linear-gradient(transparent,#fff5b2 25%,#fa3823 80%,transparent);filter:drop-shadow(0 0 12px #ff4816);transform-origin:50% 0;opacity:0;animation:ray-boom 1.15s ease-out both}
+@keyframes blast-flash{0%{opacity:0}5%,16%{opacity:.95}29%{opacity:.2}52%,100%{opacity:0}}
+@keyframes explode-sphere{0%{opacity:0;transform:translate(-50%,-50%) scale(.08)}9%{opacity:1}36%{opacity:1;transform:translate(-50%,-50%) scale(2)}100%{opacity:0;transform:translate(-50%,-50%) scale(3.9)}}
+@keyframes shockwave{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}17%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(6.5);border-width:1px}}
+@keyframes particle-boom{0%{opacity:1;transform:translate(-50%,-50%) scale(.25) rotate(0)}11%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(var(--end-scale,.4)) rotate(var(--rotation,350deg))}}
+@keyframes ray-boom{0%{opacity:0;transform:rotate(var(--a)) translateY(0) scaleY(.2)}20%{opacity:1}100%{opacity:0;transform:rotate(var(--a)) translateY(calc(var(--distance)*-1)) scaleY(2)}}
+@keyframes boom-text{0%{opacity:0;transform:translate(-50%,-50%) scale(.1) rotate(-7deg)}17%{opacity:0}37%{opacity:1;transform:translate(-50%,-50%) scale(1.22) rotate(3deg)}59%,77%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}100%{opacity:0;transform:translate(-50%,-63%) scale(1.08)}}
+@media(prefers-reduced-motion:reduce){.explosion.show .blast-symbol{animation:none;opacity:1;transform:translate(-50%,-50%)}.explosion.show .explosion-center{animation:none;opacity:.7;transform:translate(-50%,-50%) scale(1)}.explosion .blast-part,.explosion .blast-ray,.explosion .shock{display:none}}
+
+/* v1.5 mixed challenge categories and readable prompts */
+.question{font-size:clamp(18px,5.1vw,24px)!important;line-height:1.23!important;min-height:80px!important;padding:12px 14px!important}
+.phase{letter-spacing:1.1px!important;font-size:11px!important}
+.instruction{font-size:clamp(12px,3.2vw,14px)!important;color:#ffe5ec!important;line-height:1.34!important;min-height:43px!important}
+#timer{font-size:17px;color:#fff}
+@media(max-height:700px){.question{min-height:61px!important;font-size:clamp(16px,4.35vw,20px)!important;padding:7px 9px!important}.instruction{min-height:32px!important;font-size:12px!important}}
+
+/* Safari layout and touch compatibility */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;height:100%}
+body{min-height:100%;-webkit-overflow-scrolling:touch}
+.app{min-height:100vh;min-height:100svh;min-height:100dvh}
+.modal{max-height:90vh;max-height:90dvh}
+.central{-webkit-touch-callout:none;touch-action:none;-webkit-user-select:none;user-select:none}
+.tool,.btn-primary,.btn-secondary{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@supports(padding:max(0px)){.app{padding-top:max(14px,env(safe-area-inset-top));padding-bottom:max(15px,env(safe-area-inset-bottom))}}
+@media(max-width:420px){.question{overflow-wrap:break-word}}
+</style>
+</head>
+<body>
+<div class="damage" id="damage" aria-hidden="true"></div><div class="explosion" id="explosion" aria-hidden="true"><div class="blast-flash"></div><div class="shock"></div><div class="shock two"></div><div class="explosion-center"></div><strong class="blast-symbol">BOOOOM!</strong><div id="explosionPieces"></div></div>
+<main class="app" id="app">
+<header class="top"><div><div class="logo">BAS<b>MA!</b></div><div class="eyebrow">TEK BUTON · BİN TUZAK</div></div><div class="tools"><button class="tool" id="soundBtn" type="button" aria-label="Sesi aç" title="Ses">♪̸</button><button class="tool" id="pauseBtn" type="button" aria-label="Duraklat" title="Duraklat">Ⅱ</button></div></header>
+<section class="scoreboard" aria-label="Oyun istatistikleri"><div class="stat"><div class="stat-label">PUAN</div><div class="stat-value" id="score">0</div></div><div class="stat"><div class="stat-label">REKOR</div><div class="stat-value" id="best">0</div></div><div class="stat"><div class="stat-label">CAN</div><div class="stat-value hearts" id="hearts">♥</div></div></section>
+<section class="round-panel"><div class="round-top"><span class="level-mark" id="level">01 / 100</span><span id="phase" class="phase">DİKKAT TESTİ</span></div><div class="question" id="question">Hazır mısın?</div><div class="wheel" id="wheel"><div id="segments" aria-hidden="true"></div><button class="central" type="button" id="bigButton" aria-label="Oyun butonu"><div class="crack" id="crack" aria-hidden="true"></div><div class="visual" id="visual">BASMA!</div><div class="center-sub" id="sub">TEK BUTON · ÇOK TUZAK</div></button></div><div class="instruction" id="hint">Her tur bir cevap. Bazen hiç basmamalısın.</div><div class="feedback" id="feedback" aria-live="polite"></div></section>
+<section class="bottom"><div class="timer-label"><span>SÜRE BİTİYOR</span><b id="timer">10.0 sn</b></div><div class="bar"><div id="barFill"></div></div><div class="bottom-note">Dokun · Gerekirse bekle · Bilgisayarda <strong>BOŞLUK</strong><br>Fazla basmak da <strong>HATA!</strong> · Tek hak · 100 seviye</div></section>
+</main>
+<div class="shade" id="overlay"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-emblem" id="modalIcon">☠</div><div class="pill" id="modalPill">v1.5 · KARMA SORULAR</div><h1 id="modalTitle">BAS<span>MA!</span></h1><p id="modalText">Sınav değil! Garip sorular, komik tuzaklar, ters köşeler… Cevabı bul, doğru kadar bas. Tek hakkın var!</p><div class="feature-grid" id="featureGrid"><div class="feature"><strong>1–10 · 10 sn</strong>Karma sorular</div><div class="feature"><strong>11–20 · 8,5 sn</strong>Hızlan!</div><div class="feature"><strong>21–100 · 7,5 sn</strong>Çok dikkat!</div><div class="feature"><strong>HER TUR</strong>Komik ters köşeler</div></div><div class="end-grid" id="endGrid" hidden><div><b id="finalScore">0</b><span>TOPLAM PUAN</span></div><div><b id="finalLevel">0</b><span>GEÇİLEN SEVİYE</span></div></div><div class="explain" id="endReason" hidden></div><button type="button" class="btn-primary" id="actionBtn">OYUNA BAŞLA ↗</button><button type="button" class="btn-secondary" id="secondaryBtn" hidden>Baştan başla</button></div></div>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const el={app:$('app'),wheel:$('wheel'),seg:$('segments'),btn:$('bigButton'),crack:$('crack'),visual:$('visual'),sub:$('sub'),question:$('question'),hint:$('hint'),feedback:$('feedback'),score:$('score'),best:$('best'),hearts:$('hearts'),level:$('level'),phase:$('phase'),timer:$('timer'),bar:$('barFill'),damage:$('damage'),overlay:$('overlay'),modalIcon:$('modalIcon'),modalPill:$('modalPill'),modalTitle:$('modalTitle'),modalText:$('modalText'),featureGrid:$('featureGrid'),endGrid:$('endGrid'),finalScore:$('finalScore'),finalLevel:$('finalLevel'),endReason:$('endReason'),action:$('actionBtn'),secondary:$('secondaryBtn'),pause:$('pauseBtn'),sound:$('soundBtn')};
+const COUNT=44,segments=[];for(let i=0;i<COUNT;i++){const s=document.createElement('i');s.className='segment lit';s.style.transform=`rotate(${i*360/COUNT}deg) translateY(calc(var(--ring) * -.443))`;el.seg.appendChild(s);segments.push(s)}
+let score=0,best=0,life=1,level=0,cleared=0,streak=0,lastTaps=null,lastDecision=null,lastType='',current=null,taps=0,started=0,duration=10000,confirmAt=0,pausedAt=0,running=false,paused=false,finished=false,pressing=false,holdAt=0,firstTapAt=0,soundOn=false,audio=null,frame=0,nextTimeout=0,debugTypes=[],lastRoundPassed=false;
+try{best=Number(localStorage.getItem('basma_red_best_v2'))||0}catch(_){}el.best.textContent=best;
+const rand=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),choose=a=>a[rand(0,a.length-1)],shuffle=a=>a.slice().sort(()=>Math.random()-.5);
+function make(text,visual,target,extra={}){const q={text,visual,target,kind:'count',hint:'Cevap kadar bas. Gereğinden fazla basma.',...extra};if(q.target===0&&q.kind==='count')q.kind='wait';return q}
+function shapeSVG(n,star=false){const points=[];const total=star?n*2:n;for(let i=0;i<total;i++){const ang=-Math.PI/2+i*2*Math.PI/total,r=star&&i%2?22:43;points.push(`${50+Math.cos(ang)*r},${50+Math.sin(ang)*r}`)}return `<svg viewBox="0 0 100 100" role="img" aria-label="${n} ${star?'uçlu yıldız':'kenarlı şekil'}"><polygon points="${points.join(' ')}" fill="#f23656" stroke="#ffb0be" stroke-width="2.5"/></svg>`}
+function dotHTML(n){const num=rand(n,Math.min(9,n+3));const bits=shuffle([...Array(n).fill('<i class="dot hot"></i>'),...Array(num-n).fill('<i class="dot"></i>')]);return `<div class="dots">${bits.join('')}</div>`}
+const allQuestions={
+shape(){const n=rand(3,7);return make('ŞEKLİN KENAR SAYISI KADAR BAS',shapeSVG(n),n,{hint:'Köşeleri değil, kenarları say.'})},
+star(){const n=rand(5,8);return make('YILDIZIN UÇLARI KADAR BAS',shapeSVG(n,true),n,{hint:'Yıldızın dışarı uzanan uçlarını say.'})},
+dots(){const n=rand(1,6);return make('SADECE KIRMIZI NOKTALARI SAY',dotHTML(n),n,{hint:'Gri noktaları hesaba katma.'})},
+icons(){const icon=choose(['🦁','🐝','⚽','🍎','🐈']);const n=rand(1,6);const icons=shuffle([...Array(n).fill(icon),...Array(rand(1,3)).fill('🌑')]);return make('BU SEMBOLLERDEN KAÇ TANE VAR?',`<div class="row-icons">${icons.map(x=>`<span>${x}</span>`).join('')}</div>`,n,{hint:`Sadece ${icon} simgesini say.`})},
+hand(){const item=choose([{v:'☝️',n:1},{v:'✌️',n:2},{v:'🤟',n:3},{v:'🖐️',n:5}]);return make('AÇIK PARMAK SAYISI KADAR BAS',item.v,item.n,{hint:'Gördüğün parmakları say.'})},
+hearts(){const n=rand(1,6),others=rand(1,3),html=shuffle([...Array(n).fill('<span style="color:#ff3859">♥</span>'),...Array(others).fill('<span style="color:#fff">♥</span>')]);return make('SADECE KIRMIZI KALPLERİ SAY',`<div class="row-icons">${html.join('')}</div>`,n,{hint:'Beyaz kalpleri sayma.'})},
+triangles(){const n=rand(2,6);return make('ÜÇGENLERİN SAYISI KADAR BAS',`<div class="row-icons">${Array(n).fill('<span style="color:#fd5672">▲</span>').join('')}</div>`,n)},
+corners(){return make('ÇEMBERİN KÖŞE SAYISI KADAR BAS',shapeSVG(0),0,{visual:'◯',hint:'Köşe yoksa süre bitene kadar bekle.',kind:'wait'})},
+flashes(){const n=rand(2,5);return make('İLK GÖRDÜĞÜN SAYI KADAR BAS',String(n),n,{kind:'memoryFlash',hideAfter:1150,hint:'Sayı kaybolunca doğru sayıda bas.'})},
+lion(){return make('ASLANI GÖRÜNCE SADECE 1 KEZ BAS','🐯',1,{kind:'reveal',triggerAt:.54,hint:'Kaplan değil, aslan gelince dokun.',laterVisual:'🦁'})},
+words(){const words=shuffle(['BUGÜN','BİR','OYUN','DAHA','BAŞLIYOR','ŞİMDİ','ÇOK']);const n=rand(2,6);return make('CÜMLEDE KAÇ KELİME VAR?',words.slice(0,n).join(' '),n,{visualClass:'small',hint:'Boşluklarla ayrılan kelimeleri say.'})},
+letter(){const pairs=[['GALATASARAY','A',5],['KIRMIZI','I',3],['BASMA','A',2],['ÇORUM','O',1],['KARANLIK','K',2],['ASLAN','A',2],['FUTBOL','U',1]];const [word,letter]=choose(pairs);return make(`“${letter}” HARFİ KAÇ DEFA GEÇİYOR?`,word,[...word].filter(c=>c===letter).length,{visualClass:'compact',hint:'Sadece istenen harfi say.'})},
+operation(){const a=rand(4,6),b=rand(1,4),minus=Math.random()<.42,answer=minus?a-b:a+b;return make('İŞLEMİN SONUCU KADAR BAS',`<span class="equation">${a} ${minus?'−':'+'} ${b}</span>`,answer,{hint:'Sonuç sıfırsa hiç basma.',kind:answer===0?'wait':'count'})},
+oddEven(){const digits=Array.from({length:5},()=>rand(0,9)),even=Math.random()<.5,count=digits.filter(v=>even?v%2===0:v%2===1).length;return make(`${even?'ÇİFT':'TEK'} RAKAMLARI SAY`,digits.join(' '),count,{hint:even?'0 da çift bir rakamdır.':'1, 3, 5, 7, 9 tek rakamdır.',kind:count===0?'wait':'count'})},
+unique(){const arr=[rand(1,5),rand(1,5),rand(1,5),rand(1,5),rand(1,5)];return make('KAÇ FARKLI RAKAM VAR?',arr.join('  '),new Set(arr).size,{hint:'Aynı rakamı bir kez say.'})},
+numberLetters(){const dict=[['BİR',3],['İKİ',3],['ÜÇ',2],['DÖRT',4],['BEŞ',3],['ALTI',4],['SEKİZ',5],['DOKUZ',5]];const [word,count]=choose(dict);return make('BU KELİMEDE KAÇ HARF VAR?',word,count,{hint:'Sayının değerini değil harflerini say.'})},
+mathWait(){const n=rand(1,9);return make(n%2===0?'SAYI ÇİFTSE BASMA':'SAYI TEKSE BAS',String(n),n%2===0?0:1,{kind:n%2===0?'wait':'count',hint:'Yazılan koşulu uygula.'})},
+vowels(){const [word]=choose([['GALATASARAY'],['KONYA'],['ÇORUM'],['ASLAN'],['KALEM'],['BİLGİSAYAR']]);return make('SESLİ HARF SAYISI KADAR BAS',word,[...word].filter(c=>'AEIİOÖUÜ'.includes(c)).length,{visualClass:'compact',hint:'a, e, ı, i, o, ö, u, ü sesli harflerdir.'})},
+missing(){const n=rand(2,7);return make('SIRADA EKSİK OLAN SAYIYI BUL',`1 · ${n===2?'?':'2'}${n>2?` · ${Array.from({length:n-3},(_,i)=>i+3).join(' · ')}${n>3?' · ':''}?`:''} · ${n+1}`.replace(/ ·  · /g,' · '),n,{hint:'Sayı dizisinin eksik elemanını bul.',visualClass:'small'})},
+football(){const facts=[['GALATASARAY’IN YILDIZ SAYISI KAÇ?','⭐',5,'5 yıldız (2026 itibarıyla).'],['FUTBOL SAHASINDA KAÇ KALE VAR?','⚽',2,'İki kale bulunur.'],['GALATASARAY’IN KAÇ ANA RENGİ VAR?','🟡🔴',2,'Sarı ve kırmızı.'],['TÜRK BAYRAĞINDAKİ YILDIZ KAÇ UÇLU?','🇹🇷',5,'Yıldız beş uçludur.']];const [text,visual,n,hint]=choose(facts);return make(text,visual,n,{hint})},
+animals(){const facts=[['ARININ KAÇ BACAĞI VAR?','🐝',6],['ÖRÜMCEĞİN KAÇ BACAĞI VAR?','🕷️',8],['ASLANIN KAÇ AYAĞI VAR?','🦁',4],['KUŞUN KAÇ KANADI VAR?','🐦',2],['KEDİNİN KAÇ PATİSİ VAR?','🐈',4]];const [text,visual,n]=choose(facts);return make(text,visual,n,{hint:'Genel kültür testi.'})},
+knowledge(){const facts=[['BİR HAFTADA KAÇ GÜN VAR?','📅',7],['BİR YILDA KAÇ MEVSİM VAR?','🌦️',4],['BİR ÜÇGENİN KAÇ KÖŞESİ VAR?','△',3],['ÇORUM’UN PLAKA KODU KAÇ BASAMAKLI?','19',2],['1 ÇİFT AYAKTA KAÇ PARMAK VAR?','🦶🦶',10]];const [text,visual,n]=choose(facts);return make(text,visual,n,{hint:'Cevabı biliyorsan o kadar dokun.'})},
+plaque(){return make('ÇORUM’UN PLAKA RAKAMLARININ TOPLAMI', '19',10,{hint:'1 + 9. Acele etme, süren yeterli.'})},
+wait(){return make('SAKIN BASMA!', 'BASMA',0,{kind:'wait',hint:'Süre dolsun, dokunma.',visualClass:'compact'})},
+press(){return make('SADECE BİR KEZ BAS', 'BAS',1,{hint:'Tam bir dokunuş yeterli.'})},
+two(){const n=rand(2,4);return make(`${n} KEZ BAS`,String(n),n,{hint:'Butona doğru sayıda dokun.'})},
+last(){if(lastTaps===null)return allQuestions.two();return make('SON DOĞRU TURDA KAÇ KEZ BASTIN?','HATIRLA',lastTaps,{kind:lastTaps===0?'wait':'count',hint:'Bir önceki doğru turda yaptığın dokunuşu düşün.',visualClass:'compact'})},
+plusLast(){if(lastTaps===null||lastTaps>=8)return allQuestions.two();return make('ÖNCEKİ TURDAN 1 FAZLA BAS','+1',lastTaps+1,{hint:'Son doğru turdaki dokunuş sayısına 1 ekle.'})},
+reverseLast(){if(lastDecision===null)return allQuestions.wait();return make('ÖNCEKİ TURDA BASTIYSAN BASMA','TERSİ',lastDecision==='press'?0:1,{kind:lastDecision==='press'?'wait':'count',hint:'Son doğru turda hiç basmadıysan şimdi bir kez bas.'})},
+redLight(){return make('IŞIK KIRMIZIYKEN BAS','BEKLE',1,{kind:'trigger',triggerAt:.45,visualClass:'compact',laterVisual:'KIRMIZI',hint:'Kırmızı ışık yanmadan dokunma.'})},
+whiteLight(){return make('IŞIK BEYAZKEN BAS','KIRMIZI',1,{kind:'triggerWhite',triggerAt:.55,visualClass:'compact',laterVisual:'BEYAZ',hint:'Kırmızı ışık değil, beyaz ışık doğru.'})},
+delay(){return make('1,5 SANİYE BEKLE, SONRA BAS','BEKLE',1,{kind:'trigger',triggerMs:1500,laterVisual:'ŞİMDİ!',hint:'Hemen basarsan kaybedersin.',visualClass:'compact'})},
+hold(){return make('BUTONA 1 SANİYE BASILI TUT','TUT',1,{kind:'hold',hint:'Basma ve bırakma; bir saniye tut.'})},
+quick(){return make('İKİ KEZ PEŞ PEŞE HIZLI BAS','HIZLI!',2,{kind:'quick',hint:'İki dokunuş arasındaki fark en fazla 0,6 saniye.',visualClass:'compact'})},
+flashLetter(){const n=rand(2,6);return make('KAYBOLAN SAYIYI HATIRLA',String(n),n,{kind:'memoryFlash',hideAfter:1000,hint:'Sayı kaybolduktan sonra dokun.'})},
+stroop(){const isRed=Math.random()<.5,txt=choose(['KIRMIZI','BEYAZ']);return make('YAZININ RENGİ KIRMIZIYSA BİR KEZ BAS',`<span class="glow-word" style="color:${isRed?'#ff3155':'#fff'}">${txt}</span>`,isRed?1:0,{kind:isRed?'count':'wait',hint:'Kelimeyi okuma, harflerin gerçek rengine bak.'})},
+wordOpposite(){const txt=choose(['BAS','BASMA']);return make('YAZILANIN TAM TERSİNİ YAP',txt,txt==='BAS'?0:1,{kind:txt==='BAS'?'wait':'count',hint:'Gördüğün komuta değil, tersine uy.'})},
+leftRight(){const n=rand(1,5),m=rand(1,5);return make('SADECE SOLDAKİ SAYI KADAR BAS',`<span style="color:#ff4764">${n}</span> ┃ <span style="color:#aaa">${m}</span>`,n,{hint:'Sağ taraftaki sayı dikkat dağıtıcı.'})},
+redNumbers(){const vals=Array.from({length:4},()=>rand(1,5)),indices=shuffle([0,1,2,3]).slice(0,rand(1,2));return make('SADECE KIRMIZI SAYILARI TOPLA',vals.map((v,i)=>`<span style="color:${indices.includes(i)?'#ff4062':'#aaa'}">${v}</span>`).join(' '),indices.reduce((s,i)=>s+vals[i],0),{hint:'Gri sayıları toplama.',visualClass:'compact'})},
+trick(){const text=choose(['BAS','BASMA']);return make('BU TURDA KURALA DEĞİL YAZIYA UY',text,text==='BAS'?1:0,{kind:text==='BAS'?'count':'wait',hint:'Yukarıdaki cümleyi oku. Yazı ne diyorsa onu yap.'})},
+
+/* Distinct mechanics: number systems, inference, comparisons, patterns, observation and memory. */
+clock(){const h=rand(1,9);return make('SAATİN GÖSTERDİĞİ TAM SAAT KAÇ?',`🕒 ${String(h).padStart(2,'0')}:00`,h,{hint:'Dakika 00; saat kısmını oku.',visualClass:'compact'})},
+double(){const n=rand(1,4);return make('EKRANDAKİ SAYININ İKİ KATI KADAR BAS',String(n),n*2,{hint:`${n} × 2`,visualClass:'compact'})},
+half(){const n=rand(1,4);return make('SAYININ YARISI KADAR BAS',String(n*2),n,{hint:'Sayıyı ikiye böl.'})},
+squareNumber(){const n=rand(2,3);return make('SAYININ KARESİNİ BUL',`${n}²`,n*n,{hint:`${n} × ${n} işlemini yap.`})},
+subtractFromTen(){const n=rand(2,8);return make('10’A TAMAMLAYAN SAYI KADAR BAS',String(n),10-n,{hint:`10 - ${n} kaç eder?`})},
+roman(){const entries=[['I',1],['II',2],['III',3],['IV',4],['V',5],['VI',6],['VII',7],['VIII',8]];const [v,n]=choose(entries);return make('ROMA RAKAMININ DEĞERİ KADAR BAS',v,n,{hint:'I = 1, V = 5, IV = 4, VI = 6.'})},
+binary(){const n=rand(1,7);return make('İKİLİ SAYI SİSTEMİNDE KAÇ?',n.toString(2)+'₂',n,{hint:'Sağdan sola basamak değerleri: 1, 2, 4.'})},
+prime(){const nums=shuffle([2,3,4,5,6,7,8,9]).slice(0,6),primes=[2,3,5,7];return make('KAÇ ASAL SAYI VAR?',nums.join(' · '),nums.filter(n=>primes.includes(n)).length,{hint:'Yalnızca 1 ve kendisine bölünebilenleri say.',visualClass:'small'})},
+greater(){const a=rand(1,9),b=rand(1,9);return make('BÜYÜK OLAN SAYI KADAR BAS',`${a}  ⟷  ${b}`,Math.max(a,b),{hint:'İki sayıdan en büyüğünü seç.'})},
+lesser(){const a=rand(1,9),b=rand(1,9);return make('KÜÇÜK OLAN SAYI KADAR BAS',`${a}  ┊  ${b}`,Math.min(a,b),{hint:'Büyük sayıyı değil, küçüğünü seç.'})},
+numberGap(){const a=rand(1,4),d=rand(2,6),b=a+d;return make('İKİ SAYININ FARKI KADAR BAS',`${b} — ${a}`,d,{hint:`Büyükten küçüğü çıkar: ${b} − ${a}.`})},
+product(){const a=rand(2,3),b=rand(2,3);return make('ÇARPMA İŞLEMİNİ ÇÖZ',`${a} × ${b}`,a*b,{hint:'Çarpım sonucuna ulaş.'})},
+patternPlusTwo(){const first=rand(1,2);return make('DİZİDE SONRA NE GELİR?',`${first} · ${first+2} · ${first+4} · ?`,first+6,{hint:'Her adımda 2 artıyor.',visualClass:'small'})},
+patternDown(){const start=rand(7,9);return make('GERİ SAYIMDA EKSİK SAYI?',`${start} · ${start-1} · ? · ${start-3}`,start-2,{hint:'Her adımda 1 azalır.',visualClass:'small'})},
+fibonacci(){return make('DİZİNİN SONRAKİ SAYISI?', '1 · 1 · 2 · 3 · ?',5,{hint:'Önceki iki sayıyı topla.',visualClass:'small'})},
+sumDigits(){const a=rand(1,4),b=rand(1,4);return make('RAKAMLARIN TOPLAMINI BUL',`${a}${b}`,a+b,{hint:`${a} + ${b}; basamakları ayrı ayrı topla.`})},
+multiplyDigits(){const a=rand(1,3),b=rand(1,3);return make('RAKAMLARI ÇARP',`${a}${b}`,a*b,{hint:'İki basamağı ayrı çarp.'})},
+zeroCount(){const n=rand(1,4),zeros=Array(n).fill('0'),other=Array(6-n).fill(String(rand(1,8)));return make('SADECE SIFIRLARIN SAYISI KADAR BAS',shuffle([...zeros,...other]).join('  '),n,{hint:'0 olanları say, diğerlerini geç.'})},
+countSevens(){const n=rand(1,4);return make('SADECE 7 RAKAMLARINI SAY',shuffle([...Array(n).fill('7'),...Array(6-n).fill('1')]).join(' '),n,{hint:'Birler dikkat dağıtmak için var.'})},
+triangleSum(){const a=rand(1,3),b=rand(1,3);return make('ÜÇGENDEKİ SAYILARI TOPLA',`△ ${a}  ${b} △`,a+b,{hint:'Çerçevedeki iki sayıyı topla.'})},
+countColors(){const red=rand(1,4),white=rand(1,3);return make('KIRMIZI HARFLERİ SAY',shuffle([...Array(red).fill('<span style="color:#ff3d59">A</span>'),...Array(white).fill('<span style="color:#eee">B</span>')]).join(' '),red,{hint:'Beyazları sayma.',visualClass:'compact'})},
+gridMultiply(){const r=rand(2,3),c=rand(2,3);return make('KAÇ KÜÇÜK KARE VAR?',`<div class="tile-grid" style="display:grid;grid-template-columns:repeat(${c},21px);gap:5px">${Array(r*c).fill('<i style="display:block;width:21px;height:21px;background:#ff3d5b;border:1px solid #ffc2ce;border-radius:3px"></i>').join('')}</div>`,r*c,{hint:`${r} satır ve ${c} sütunu say.`})},
+domino(){const a=rand(1,3),b=rand(1,3);return make('DOMİNONUN TOPLAM NOKTASI?',`<span style="font-size:.9em">${'⚫'.repeat(a)} | ${'⚫'.repeat(b)}</span>`,a+b,{hint:'İki yarıdaki siyah noktaları topla.',visualClass:'compact'})},
+emojisSum(){const a=rand(1,3),b=rand(1,3);return make('ELMA + MUZ = KAÇ MEYVE?',`${'🍎'.repeat(a)}<span style="color:#ff5f76"> + </span>${'🍌'.repeat(b)}`,a+b,{hint:'İki meyve türünü birlikte say.',visualClass:'compact'})},
+emojiOdd(){const n=rand(2,6),icon=choose(['🍋','🐟','🍕']);return make('DİĞERLERİNDEN FARKLI KAÇ SİMGE VAR?',shuffle([...Array(n).fill(icon),'☠️']).join(' '),1,{hint:'Yalnızca farklı olanı say.',visualClass:'compact'})},
+animalsFly(){const birds=rand(1,4);return make('UÇABİLENLERİ SAY',shuffle([...Array(birds).fill('🐦'),...Array(rand(1,3)).fill('🐢')]).join(' '),birds,{hint:'Kuşlar uçabilir; kaplumbağalar uçamaz.',visualClass:'compact'})},
+emojiEyes(){const eyes=rand(1,4);return make('KAÇ GÖZ SEMBOLÜ VAR?',shuffle([...Array(eyes).fill('👁️'),...Array(rand(1,3)).fill('👂')]).join(' '),eyes,{hint:'Kulakları sayma.',visualClass:'compact'})},
+weekDays(){const arr=[['PAZARTESİ',1],['SALI',2],['ÇARŞAMBA',3],['PERŞEMBE',4],['CUMA',5],['CUMARTESİ',6],['PAZAR',7]], [v,n]=choose(arr);return make('HAFTANIN KAÇINCI GÜNÜ?',v,n,{hint:'Pazartesi 1. gündür.',visualClass:'compact'})},
+months(){const arr=[['OCAK',1],['ŞUBAT',2],['MART',3],['NİSAN',4],['MAYIS',5],['HAZİRAN',6],['TEMMUZ',7],['AĞUSTOS',8],['EYLÜL',9]], [v,n]=choose(arr);return make('YILIN KAÇINCI AYI?',v,n,{hint:'Ocak = 1, Şubat = 2, Mart = 3 ...',visualClass:'compact'})},
+trAlphabet(){const arr=[['A',1],['B',2],['C',3],['Ç',4],['D',5],['E',6],['F',7],['G',8],['Ğ',9]], [v,n]=choose(arr);return make('TÜRK ALFABESİNDE KAÇINCI HARF?',v,n,{hint:'Türk alfabesinde C’den sonra Ç gelir.'})},
+wordCompare(){const a=choose(['KAPI','MUTLU','KALEM']),b=choose(['SU','GÜL','EV']);return make('UZUN KELİMENİN HARF SAYISI KADAR BAS',`${a}   /   ${b}`,Math.max([...a].length,[...b].length),{hint:'Harf sayısı fazla olan kelimeyi bul.',visualClass:'compact'})},
+wordDifference(){const a=choose(['KALEM','KİTAP','DÜNYA']),b=choose(['EV','SU','GÖL']);const delta=Math.abs([...a].length-[...b].length);return make('İKİ KELİMENİN HARF SAYISI FARKI?',`${a} / ${b}`,delta,{hint:'Harf sayıları arasındaki farkı bul.',visualClass:'small'})},
+reverseNumber(){const n=rand(1,8);return make('TERS OKUNUNCA HANGİ SAYI?',`${n} → ?`,n,{hint:'Tek basamak ters okununca değişmez.'})},
+arrowDirection(){const icon=choose(['⬅️','➡️','⬆️','⬇️']);return make('OK SAĞI GÖSTERİYORSA 1 KEZ BAS',icon,icon==='➡️'?1:0,{kind:icon==='➡️'?'count':'wait',hint:'Sağı göstermiyorsa hiç basma.'})},
+trafficLight(){const red=Math.random()<.5;return make('TRAFİK IŞIĞI YEŞİLSE BAS',red?'🔴':'🟢',red?0:1,{kind:red?'wait':'count',hint:'Yeşil = geç; kırmızı = bekle.'})},
+parityGate(){const n=rand(1,9),isEven=Math.random()<.5;return make(isEven?'ÇİFT SAYIYSA BAS':'TEK SAYIYSA BAS',String(n),(n%2===0)===isEven?1:0,{kind:(n%2===0)===isEven?'count':'wait',hint:'Koşul doğruysa 1 bas; yanlışsa bekle.'})},
+trueFalse(){const truths=[['BİR ÜÇGENİN 3 KENARI VARDIR',true],['BİR ÖRÜMCEĞİN 6 BACAĞI VARDIR',false],['GÜNEŞ BİR YILDIZDIR',true],['BİR YILDA 13 AY VARDIR',false],['TÜRK BAYRAĞI AY VE YILDIZ TAŞIR',true],['2 × 4 = 7',false],['YARASA MEMELİDİR',true]];const [v,b]=choose(truths);return make('CÜMLE DOĞRUYSA 1 KEZ BAS',`“${v}”`,b?1:0,{kind:b?'count':'wait',hint:'Yanlışsa dokunmadan bekle.',visualClass:'small'})},
+colorName(){const isRed=Math.random()<.5;return make('KELİME KIRMIZIYI İFADE EDİYORSA BAS',isRed?'KIRMIZI':'SİYAH',isRed?1:0,{kind:isRed?'count':'wait',hint:'Burada harfin rengi değil kelimenin anlamı önemli.',visualClass:'compact'})},
+palindrome(){const [w,ok]=choose([['KAZAK',true],['KEK',true],['ATA',true],['KALEM',false],['ASLAN',false],['KONYA',false]]);return make('TERSTEN AYNI OKUNUYORSA BAS',w,ok?1:0,{kind:ok?'count':'wait',hint:'Tersten okuyunca değişmiyorsa bir kez dokun.'})},
+firstLetter(){const word=choose(['ASLAN','BASMA','GÜNEŞ','KONYA','OYUN']);return make('İLK HARF ÜNLÜYSE BAS',word,'AEIİOÖUÜ'.includes(word[0])?1:0,{kind:'AEIİOÖUÜ'.includes(word[0])?'count':'wait',hint:'Ünlüler: A E I İ O Ö U Ü.',visualClass:'compact'})},
+lastLetter(){const word=choose(['ÇORUM','KONYA','BASMA','KALEM','KEDİ','GÜNEŞ']);const ok='AEIİOÖUÜ'.includes(word.slice(-1));return make('SON HARF ÜNLÜYSE BAS',word,ok?1:0,{kind:ok?'count':'wait',hint:'Kelimenin yalnızca son harfine bak.',visualClass:'compact'})},
+containsA(){const word=choose(['KONYA','ÇORUM','FUTBOL','ASLAN','MUTLU','GALATA']);const yes=word.includes('A');return make('KELİMEDE “A” VARSA BAS',word,yes?1:0,{kind:yes?'count':'wait',hint:'A harfi yoksa süreyi bekle.',visualClass:'compact'})},
+countVowelsTwo(){const word=choose(['KAPI','MUTLULUK','KİTAP','GALATA','BULUT']);return make('ÜNLÜLERİ BUL VE SAY',word,[...word].filter(c=>'AEIİOÖUÜ'.includes(c)).length,{hint:'Ünlü harfleri say.',visualClass:'compact'})},
+countEquationTruth(){const ar=shuffle([['2+2=4',true],['3+1=5',false],['1+5=6',true],['2×2=5',false]]);return make('DOĞRU İŞLEMLERİ SAY',ar.map(([q,b])=>`<span style="font-size:.64em">${q}</span>`).join(' · '),2,{hint:'Dört eşitliğin ikisi doğru.',visualClass:'small'})},
+lastPlusFirst(){const a=rand(1,4),b=rand(1,4);return make('İLK VE SON RAKAMI TOPLA',`${a} 9 6 ${b}`,a+b,{hint:'Ortadaki 9 ve 6 seni şaşırtmasın.'})},
+redBigger(){const red=rand(1,4),black=rand(1,4);return make('SADECE KIRMIZININ 2 KATI KADAR BAS',`<span style="color:#ff2549">${red}</span> / <span style="color:#fff">${black}</span>`,red*2,{hint:'Beyaz sayıyı görmezden gel.'})},
+footballs(){const n=rand(1,5);return make('KAÇ FUTBOL TOPU VAR?',shuffle([...Array(n).fill('⚽'),...Array(rand(1,3)).fill('🏀')]).join(' '),n,{hint:'Basketbol toplarını sayma.',visualClass:'compact'})},
+nationalFlag(){return make('TÜRK BAYRAĞINDA KAÇ YILDIZ VAR?', '🇹🇷',1,{hint:'Yıldızın uç sayısı değil, yıldız adedi.'})},
+continent(){return make('DÜNYADA KAÇ KITA VAR?', '🌍',7,{hint:'Yaygın yedi kıta modelini kullan.'})},
+chessHorse(){return make('SATRANÇTA BİR OYUNCUNUN KAÇ ATI OLUR?', '♞ ♞',2,{hint:'Başlangıç dizilişindeki atları düşün.'})},
+keyboard(){return make('KLASİK ZARDA KARŞI YÜZLER TOPLAMI?', '🎲',7,{hint:'Standart zarda karşılıklı yüzlerin toplamı 7.'})},
+musicNotes(){const count=rand(1,5);return make('MÜZİK NOTALARINI SAY',Array(count).fill('♪').join(' '),count,{hint:'Gösterilen nota sembollerini say.',visualClass:'compact'})},
+moonPhases(){return make('ANA AY EVRELERİNİN SAYISI?', '🌑 🌓 🌕 🌗',4,{hint:'Yeni ay, ilk dördün, dolunay, son dördün.',visualClass:'compact'})},
+speedTrap(){const n=rand(1,4);return make('EKRANDAKİ SAYI KADAR BAS; ACELE ET!',`${n}`,n,{hint:'Hızlı düşün ama yanlış sayma!',speed:true})},
+rememberIcon(){const n=rand(2,5);return make('KAYBOLAN YILDIZLARI HATIRLA',Array(n).fill('⭐').join(''),n,{kind:'memoryFlash',hideAfter:1200,hint:'Yıldızlar gidince kaç tane olduğunu hatırla.',visualClass:'compact'})},
+waitForLion(){return make('KEDİYİ DEĞİL ASLANI GÖRÜNCE BAS','🐈',1,{kind:'reveal',triggerAt:.62,laterVisual:'🦁',hint:'Aslan görünene kadar bekle.'})},
+waitForClock(){return make('“ŞİMDİ” YAZINCA BİR KEZ BAS','BİRAZ BEKLE',1,{kind:'trigger',triggerAt:.52,laterVisual:'ŞİMDİ',hint:'Yazı değişmeden dokunma.',visualClass:'small'})},
+holdLong(){return make('1 SANİYE BASILI TUT; ERKEN BIRAKMA','✊',1,{kind:'hold',hint:'Butonun üstünden parmağını kaldırma.'})},
+noPress(){return make('BU TURDA HİÇ DOKUNMA','✋',0,{kind:'wait',hint:'Süre tamamen bitince turu geçersin.'})},
+questionMark(){return make('GÖRDÜĞÜN SORU İŞARETİ SAYISI KADAR BAS','???',3,{hint:'Üç soru işareti görüyorsun.'})}
+};
+/* Authored brain-teasers. Numeric solutions are the number of button presses. */
+const clever={
+  overtakeSecond(){return make('YARIŞTA İKİNCİYİ GEÇTİN. KAÇINCISIN?', '🏁',2)},
+  takePens(){return make('5 KALEMDEN 2’SİNİ ALDIN. ELİNDE KAÇ KALEM VAR?', '✏️ ✏️ ✏️ ✏️ ✏️',2,{visualClass:'compact'})},
+  sharedSister(){return make('4 ERKEK KARDEŞİN HEPSİNİN AYNI KIZ KARDEŞİ VAR. KAÇ ÇOCUK?', '👦👦👦👦👧',5,{visualClass:'compact'})},
+  twoFathers(){return make('2 BABA VE 2 OĞUL, EN AZ KAÇ KİŞİ OLABİLİR?', '👨‍👦',3)},
+  extinguishedCandles(){return make('MASADA 5 MUMUN 2’Sİ SÖNDÜ. ŞU AN KAÇ MUM VAR?', '🕯️ 🕯️ 🕯️ 🕯️ 🕯️',5,{visualClass:'compact'})},
+  oneLeg(){return make('TEK AYAK ÜZERİNDE DURAN KUŞUN KAÇ AYAĞI VAR?', '🐦',2)},
+  glassHalf(){return make('2 DOLU, 1 BOŞ BARDAK VAR. BİR DOLUYU BOŞALTIRSAN KAÇ BOŞ OLUR?', '🥛 🥛 ◯',2,{visualClass:'compact'})},
+  raceLast(){return make('YARIŞTA SONUNCUYU GEÇEBİLİR MİSİN? EVETSE 1 BAS.', '🏃',0,{kind:'wait'})},
+  sameHand(){return make('İKİ ELDE TOPLAM KAÇ BAŞPARMAK VAR?', '👐',2)},
+  eggCarton(){return make('4 YUMURTAN VAR. 1’İNİ KIRDIN, PİŞİRDİN, YEDİN. KAÇ KALDI?', '🥚',3)},
+  threeChairs(){return make('3 SANDALYENİN TOPLAM KAÇ ARKALIĞI VARDIR?', '🪑 🪑 🪑',3,{visualClass:'compact'})},
+  countBefore(){return make('5’TEN ÖNCE GELEN SAYININ YARISI KAÇ?', '5',2)},
+  mondayEarlier(){return make('PAZARTESİDEN BİR GÜN ÖNCE, HAFTANIN KAÇINCI GÜNÜ? (PZT=1)', '📅',7)},
+  siblingsPair(){return make('2 KARDEŞİN HER BİRİNİN 1 KARDEŞİ VAR. EN AZ KAÇ ÇOCUK?', '👧👦',2)},
+  doubledZero(){return make('0’IN İKİ KATINA BAS.', '0 × 2',0,{kind:'wait'})},
+  twoHalf(){return make('İKİ YARIM ELMA KAÇ TAM ELMA EDER?', '🍏½ + ½🍏',1,{visualClass:'compact'})},
+  chairLegsMinus(){return make('BİR SANDALYENİN 4 AYAĞINDAN 1’İ KIRILDI. KAÇ AYAĞI VAR?', '🪑',4)},
+  letterNotNumber(){return make('“SEKİZ” KELİMESİNDE KAÇ HARF VAR?', 'SEKİZ',5)},
+  fingersOnOne(){return make('BİR ELDE BAŞPARMAK HARİÇ KAÇ PARMAK VAR?', '✋',4)},
+  lookAtEquals(){return make('2+3=5, 1+2=4, 4−2=2. KAÇ EŞİTLİK DOĞRU?', '✓ / ✕',2,{visualClass:'compact'})},
+  chooseSmall(){const n=rand(2,7);return make('İKİNCİSİ DAHA BÜYÜKSE, KÜÇÜK SAYI KADAR BAS.', `${n} < ${n+1}`,n,{visualClass:'compact'})},
+  trickTwice(){return make('BİR KEZ BAS, SONRA BİR DAHA BAS. TOPLAM?', '1 + 1',2)},
+  redNotRed(){return make('KIRMIZI GÖRÜNEN RAKAMI DEĞİL, SİYAHI OKU.', '<span style="color:#fa3655">8</span> · <span style="color:white">3</span>',3)},
+  twoCorners(){return make('BİR ÜÇGEN VE BİR KARENİN TOPLAM KAÇ KÖŞESİ VAR?', '△ + □',7)},
+  threeToes(){return make('İKİ ELİN VARSA KAÇ SERÇE PARMAĞIN VAR?', '👐',2)},
+  zeroCircle(){return make('ÜÇ ÇEMBERİN TOPLAM KÖŞE SAYISI?', '◯ ◯ ◯',0,{kind:'wait'})},
+  lettersWithin(){const word=choose(['AABBA','ABBBA','BAABA']);return make('“B” HARFİ KAÇ KEZ YAZILMIŞ?',word,[...word].filter(c=>c==='B').length)},
+  mixedTruth(){return make('HANGİLERİ DOĞRU? 1<2, 5<3, 4=4', '1<2 · 5<3 · 4=4',2,{visualClass:'small'})},
+  nestedBrackets(){return make('ÖNCE PARANTEZİ HESAPLA.', '8 − (3 + 2)',3)},
+  trickTwoMothers(){return make('2 ANNE, 2 KIZ BİRLİKTE; EN AZ KAÇ KİŞİ?', '👵👩👧',3,{visualClass:'compact'})},
+  timeSlice(){return make('YARIM SAATTE KAÇ TANE 10 DAKİKA VAR?', '30 dk',3)},
+  evenZero(){return make('0,1,2,3,4 ARASINDA KAÇ ÇİFT SAYI VAR?', '0 1 2 3 4',3,{visualClass:'compact'})},
+  notCountLetters(){return make('“ON” SAYISININ DEĞERİ DEĞİL, HARF SAYISI KAÇ?', 'ON',2)},
+  sameDay(){return make('DÜN PAZARDIYSA BUGÜN HAFTANIN KAÇINCI GÜNÜ? (PZT=1)', '📆',1)},
+  bothNext(){return make('BİRİNCİ RAKAMIN 1 FAZLASI KAÇ?', '3  7  2',4,{visualClass:'compact'})},
+  onlyZero(){return make('“0000” SAYISININ BASAMAK SAYISI KAÇ?', '0000',4)},
+  doubleNegative(){return make('BASMA KELİMESİ “BAS” DİYE BAŞLIYORSA BAS.', 'BASMA',1)},
+  wrongEquation(){return make('KAÇ İŞLEM HATALI? 3+3=6, 2+2=5, 4−1=2', '3+3=6 · 2+2=5 · 4−1=2',2,{visualClass:'small'})},
+  mirrorOneDigit(){const n=rand(1,7);return make('TEK BASAMAKLI SAYIYI TERSTEN YAZSAN KAÇ BASAMAKLI?', String(n),1)},
+  literalThree(){return make('BU YAZIDA KAÇ TANE SAYI ADI VAR?', 'BİR  İKİ  ÜÇ',3,{visualClass:'compact'})},
+  countInQuestion(){return make('“BAS BASMA BAS” İÇİNDE TAM OLARAK “BAS” KAÇ KEZ VAR?', 'BAS BASMA BAS',2,{visualClass:'compact'})},
+  palindromePair(){return make('KAÇI TERSTEN AYNI OKUNUR?', 'ATA · KALEM · KAZAK',2,{visualClass:'small'})},
+  reverseOrder(){return make('EN SONDA YAZILAN SAYININ KAÇ FAZLASI 5 EDER?', '2 · 1 · 4',1,{visualClass:'compact'})},
+  equalsNot(){return make('“2+2=5” YANLIŞSA 1 KEZ BAS.', '2 + 2 = 5',1)},
+  equalTwo(){return make('2+2 VE 2×2 SONUÇLARI BİRBİRİNE EŞİTSE BAS.', '2+2 ? 2×2',1)},
+  noVowels(){return make('BU SESSİZ HARF DİZİSİNDE KAÇ ÜNLÜ VAR?', 'BRŞTK',0,{kind:'wait'})},
+  vowelDistinct(){return make('KAÇ FARKLI ÜNLÜ HARF VAR?', 'A A E E İ',3,{visualClass:'compact'})},
+  clockArms(){return make('ANALOG SAATTE AKREP VE YELKOVAN TOPLAM KAÇTIR?', '🕒',2)},
+  reversedWord(){return make('TERSTEN OKUYUNCA DA AYNI: KAÇ KELİME?', 'KEK · ATA · ELMA · KAZAK',3,{visualClass:'small'})},
+  greaterFalse(){return make('3 < 2 İFADESİ DOĞRUYSA 1 KEZ BAS.', '3 < 2',0,{kind:'wait'})},
+  andOr(){return make('“2 ÇİFT VE 3 TEK” İFADESİ DOĞRUYSA BAS.', '2 · 3',1)},
+  firstLast(){return make('İLK VE SON RAKAMI TOPLA. ORTADAKİNE DOKUNMA.', '2 · 9 · 4',6,{visualClass:'compact'})},
+  pairDigits(){return make('12 İÇİNDE 1 VE 2’NİN TOPLAMI?', '12',3)},
+  lettersOfDay(){return make('DÜN CUMA İSE, BUGÜNÜN HARF SAYISI?', 'CUMA → ?',9,{visualClass:'compact'})},
+  notThree(){return make('3’TEN KÜÇÜK POZİTİF TAM SAYI KAÇ TANE?', '1 · 2 · 3',2,{visualClass:'compact'})},
+  fourEqualities(){return make('KAÇI DOĞRU? 0=0, 2>1, 3<2, 4=5', '0=0 · 2>1 · 3<2 · 4=5',2,{visualClass:'small'})},
+  wordFirstVowel(){return make('“KİTAP” KELİMESİNDEKİ İLK ÜNLÜ HARF KAÇINCI SIRADA?', 'KİTAP',2)},
+  wordsWithA(){return make('KAÇ KELİMEDE “A” VAR?', 'ARABA · KEDİ · MASA',2,{visualClass:'small'})},
+  manyA(){return make('“ANANAS” İÇİNDE KAÇ “AN” DİZİSİ VAR?', 'ANANAS',2)},
+  oneFewer(){return make('3 DENEYİN 1’İ BAŞARISIZ. KAÇI BAŞARILI?', '✓ ✓ ✕',2,{visualClass:'compact'})},
+  doubleDouble(){return make('1’İ İKİ KEZ İKİYLE ÇARPARSAN?', '1 × 2 × 2',4)},
+  altAdd(){return make('ÇİFT İNDEKSLERİ TOPLA (2. VE 4. SAYI).', '9 · 2 · 8 · 3',5,{visualClass:'compact'})},
+  parityOfSum(){return make('2 + 3 ÇİFTSE BAS, TEKSE BASMA.', '2 + 3',0,{kind:'wait'})},
+  overlapLetters(){return make('KELİMELERDE ORTAK KAÇ FARKLI HARF VAR?', 'KAZ · KAT',2,{visualClass:'compact'})},
+  intersectionNums(){return make('İKİ GRUPTA DA BULUNAN SAYILARI SAY.', '1 2 3  /  2 3 4',2,{visualClass:'small'})},
+  countUps(){return make('DİZİ KAÇ KEZ YÜKSELİYOR?', '2 → 5 → 3 → 6',2,{visualClass:'small'})},
+  countDowns(){return make('DİZİ KAÇ KEZ AZALIYOR?', '7 → 4 → 6 → 2',2,{visualClass:'small'})},
+  increasingPattern(){return make('FARKLAR 1, 2, 3 İSE SONRAKİ SAYININ RAKAMLARI TOPLAMI?', '1 · 2 · 4 · 7 · ?',2,{visualClass:'small'})},
+  nextDifference(){return make('1, 3, 6, 10 DİZİSİNDE SONRAKİ SAYI KAÇ BASAMAKLI?', '1 · 3 · 6 · 10 · ?',2,{visualClass:'small'})},
+  twiceThree(){return make('3 KEDİ, 3 FAREYİ 3 DAKİKADA YAKALAR. 6 KEDİ 6 FAREYİ KAÇ DAKİKADA?', '🐈 🐁 ⏱',3,{visualClass:'compact'})},
+  nextSibling(){return make('3 KARDEŞİN 1 ORTAK KIZ KARDEŞİ VAR. TOPLAM KAÇ ÇOCUK?', '👦👦👦 + 👧',4,{visualClass:'compact'})},
+  notAllFalse(){return make('“BU İFADE YANLIŞTIR” PARADOKSUNA GİRME: 2+2=?', '2 + 2',4)},
+  sixHalf(){return make('6’NIN YARISININ 1 FAZLASI KAÇ?', '6 ÷ 2 + 1',4)},
+  doubleTwice(){return make('2’NİN İKİ KATININ YARISI KAÇ?', '2 × 2 ÷ 2',2)},
+  simpleBoxes(){return make('2 KUTUDA 3’ER TOP VAR. TOPLAMIN YARISI?', '📦 📦',3)},
+  yesterdayNext(){return make('BUGÜN SALIYSA, DÜNDEN 2 GÜN SONRA HANGİ GÜN? HAFTANIN KAÇINCISI?', 'SALI',3)},
+  threeWordsOnly(){return make('“KÜÇÜK BÜYÜK KÜÇÜK” YAZISINDA KAÇ FARKLI KELİME VAR?', 'KÜÇÜK BÜYÜK KÜÇÜK',2,{visualClass:'small'})},
+  skipOne(){return make('BİR ATLARAK SAY: SONRA HANGİ RAKAM?', '1 3 5 7 ?',9,{visualClass:'compact'})},
+  whichPrime(){return make('1, 2, 3, 4, 5 İÇİNDE KAÇ ASAL SAYI?', '1 · 2 · 3 · 4 · 5',3,{visualClass:'small'})},
+  countFalse(){return make('YANLIŞ İFADELERİ SAY.', '2=3 · 4>3 · 5<2 · 6=6',2,{visualClass:'small'})},
+  onlyDistinct(){return make('TEKRAR EDEN RAKAMLARI BİR KEZ SAY.', '2 · 2 · 3 · 3 · 4',3,{visualClass:'small'})},
+  memoryReverse(){return make('SAYI KAYBOLUNCA RAKAMLARIN TOPLAMINA BAS.', '24',6,{kind:'memoryFlash',hideAfter:1500})},
+  memoryTwice(){const n=rand(2,4);return make('SAYI KAYBOLUNCA 2 KATINA BAS.',String(n),n*2,{kind:'memoryFlash',hideAfter:1450})},
+  memoryEven(){return make('YAZI KAYBOLUNCA SADECE ÇİFT RAKAMLARI SAY.', '2 3 4 5 6',3,{kind:'memoryFlash',hideAfter:1600,visualClass:'compact'})},
+  showLate(){return make('“ŞİMDİ” GÖRÜNMEDEN BASMA. GÖRÜNCE 1 KEZ BAS.', 'SABRET',1,{kind:'trigger',triggerAt:.42,laterVisual:'ŞİMDİ',visualClass:'compact'})},
+  showLion(){return make('KAPLAN DEĞİL, ASLAN GELİNCE BAS.', '🐯',1,{kind:'reveal',triggerAt:.49,laterVisual:'🦁'})},
+  hiddenColor(){return make('SÖZCÜĞE DEĞİL RENKTEKİ İPUCUNA BAK: KIRMIZIYSA BAS.', '<span style="color:#fff">KIRMIZI</span>',0,{kind:'wait'})},
+  noDoublePress(){return make('2 KEZ BAS DİYOR. 3. BASIŞ HATA!', '2',2)},
+  holdForOne(){return make('1 SANİYE TUT; TEK DOKUNUŞ YETMEZ.', 'TUT',1,{kind:'hold'})},
+  quickTwice(){return make('İKİNCİ BASIŞIN İLKİNDEN EN ÇOK 0,6 SN SONRA OLSUN.', '2 HIZLI',2,{kind:'quick',visualClass:'compact'})},
+  hundredUnits(){return make('100 SAYISINDA KAÇ FARKLI RAKAM VAR?', '100',2)},
+  zeroVsLetter(){return make('“O0O00” İÇİNDE KAÇ RAKAM VAR? (O HARFTİR)', 'O0O00',3,{visualClass:'compact'})},
+  upperLower(){return make('“aAaAA” İÇİNDE KAÇ BÜYÜK A VAR?', 'aAaAA',3,{visualClass:'compact'})},
+  blankWords(){return make('“BİR   İKİ” İFADESİNDE KAÇ KELİME VAR?', 'BİR   İKİ',2,{visualClass:'compact'})},
+  withoutValue(){return make('1, 2, 2, 3 İÇİNDE TEKRAR EDEN RAKAM KAÇ TANE?', '1 2 2 3',1,{visualClass:'compact'})},
+  plusMinus(){return make('7’NİN 2 EKSİĞİNİN 3 FAZLASI KAÇ?', '7 − 2 + 3',8)},
+  groupFour(){return make('8 NOKTANIN KAÇ ÇİFTİ VAR?', '•• •• •• ••',4,{visualClass:'compact'})},
+  minusZero(){return make('4’ÜN SIFIR KATINDAN 1 ÇIKARMA: SADECE 0 KATI KADAR BAS.', '4 × 0',0,{kind:'wait'})},
+  diagonalOrder(){return make('YALNIZCA KÖŞE SAYILARINI TOPLA (İLK VE SON).', '1 5 8 3',4,{visualClass:'compact'})},
+  leftHand(){return make('10 PARMAKTAN 1 ELİ ÇIKARIRSAN KAÇ PARMAK KALIR?', '🖐️ + 🖐️',5)},
+  bigWordSmallNumber(){return make('YAZI BÜYÜK, SAYI KÜÇÜK. SAYININ DEĞERİ KADAR BAS.', '<span style="font-size:.7em">KOCAMAN</span> 2',2,{visualClass:'compact'})},
+  countBlueNotRed(){return make('KIRMIZILARI DEĞİL, BEYAZ KALPLERİ SAY.', '<span style="color:#ff244b">♥♥♥</span> <span style="color:white">♥♥</span>',2,{visualClass:'compact'})},
+  pairSum(){return make('3+3+3 TOPLAM KAÇ TANE 3 İÇERİR?', '3 + 3 + 3',3)},
+  letterBNotP(){return make('SADECE B HARFLERİNİ SAY.', 'B P B P B',3,{visualClass:'compact'})},
+  crossing(){return make('YARIŞTA ÜÇÜNCÜYÜ GEÇERSEN KAÇINCI OLURSUN?', '🏃‍♂️',3)},
+  dominoNotSum(){return make('2 VE 3’ÜN TOPLAMI DEĞİL, ÇARPIMI?', '2 • 3',6)},
+  countConsonants(){return make('“ASLAN” KELİMESİNDE KAÇ SESSİZ HARF VAR?', 'ASLAN',3)},
+  aCountInWords(){return make('“ANANAS” KELİMESİNDE KAÇ A HARFİ VAR?', 'ANANAS',3)},
+  sameHeight(){return make('BİR SAYIYI KENDİSİNDEN ÇIKARIRSAN KAÇ?', '8 − 8',0,{kind:'wait'})},
+  daysFromNow(){return make('BUGÜN CUMA İSE, 2 GÜN SONRAKİ GÜNÜN HARF SAYISI?', 'CUMA',5)},
+  nonNumerical(){return make('ÜÇ KEZ “1” YAZILDIYSA SAYI DEĞERLERİNİN TOPLAMI?', '1 1 1',3,{visualClass:'compact'})},
+  primeDifference(){return make('5’TEN KÜÇÜK ASAL SAYILARIN TOPLAMI?', '2 + 3',5)},
+  squaresSides(){return make('İKİ KARE TOPLAM KAÇ KENAR?', '□ □',8)},
+  notSquare(){return make('ÜÇGENİN KENARLARI İLE KARENİN KÖŞELERİ TOPLAMI?', '△ + □',7)},
+  waveThree(){return make('SADECE İKİNCİ VE DÖRDÜNCÜYÜ TOPLA.', '9 · 3 · 8 · 4',7,{visualClass:'compact'})},
+  reverseThree(){return make('321’İ TERSTEN YAZSAN KAÇ BASAMAKLI?', '321',3)},
+  smallNumberLargeText(){return make('“BÜYÜK” YAZISI BÜYÜKSE BASMA; SÖZCÜK ÖLÇÜSÜNE BAKMA, 2 KEZ BAS.', 'BÜYÜK',2,{visualClass:'small'})},
+  digitFirst(){return make('SONUÇ DEĞİL, İŞLEMDEKİ RAKAM SAYISI?', '2 + 3 × 4',3)},
+  visibleFalse(){return make('“GÖRÜNMEYEN” KELİMESİ EKRANDA YAZIYORSA 1 KEZ BAS.', 'GÖRÜNMEYEN',1,{visualClass:'compact'})},
+  sequenceWord(){return make('“BİR İKİ ÜÇ” DİZİSİNDE ORTADAKİ SAYININ DEĞERİ?', 'BİR  İKİ  ÜÇ',2,{visualClass:'compact'})},
+  sayNo(){return make('BU TURUN GÖREVİ “BASMA”. SÖZCÜĞÜ OKU VE UYGULA.', 'BASMA',0,{kind:'wait'})}
+};
+Object.assign(allQuestions,clever);
+/* Expert tier — deliberately distinct two-step reasoning and observation. */
+const expert={
+ unknownSum(){return make('? + 3 = 8. SORU İŞARETİNİN DEĞERİ?', '? + 3 = 8',5)},
+ unknownMinus(){return make('9 − ? = 4. EKSİK SAYI?', '9 − ? = 4',5)},
+ unknownDouble(){return make('? × 2 = 8. ? KAÇ?', '? × 2 = 8',4)},
+ parenthesesFirst(){return make('İŞLEM ÖNCELİĞİNE DİKKAT.', '2 + 3 × 2',8)},
+ zeroSum(){return make('BU İŞLEMİN SONUCU SIFIRSA HİÇ BASMA.', '4 − 2 × 2',0,{kind:'wait'})},
+ quarterOfEight(){return make('8’İN ÇEYREĞİNİN 1 FAZLASI?', '8 ÷ 4 + 1',3)},
+ betweenThreeSeven(){return make('3 İLE 7 ARASINDA KAÇ TAM SAYI VAR?', '3 · ? · ? · ? · 7',3,{visualClass:'small'})},
+ evenSumFive(){return make('1 İLE 5 ARASINDAKİ ÇİFT SAYILARI TOPLA (UÇLAR DAHİL).', '1 2 3 4 5',6,{visualClass:'compact'})},
+ squareMinusOne(){return make('3’ÜN KARESİNİN 1 EKSİĞİ?', '3² − 1',8)},
+ insideBrackets(){return make('SADECE KÖŞELİ PARANTEZDEKİ SAYILARI TOPLA.', '[2] (8) [4]',6,{visualClass:'compact'})},
+ andBoth(){return make('3 TEK VE 4 ÇİFTSE 2 KEZ BAS, DEĞİLSE BASMA.', '3 · 4',2)},
+ secondTimesThree(){return make('ORTADAKİ RAKAMIN 3 KATI KAÇ?', '9 · 2 · 5',6,{visualClass:'compact'})},
+ normalOrder(){return make('ÖNCE BÖLMEYİ YAP.', '4 + 4 ÷ 2',6)},
+ medianOfThree(){return make('EN BÜYÜK VE EN KÜÇÜĞÜ DEĞİL, ORTANCA SAYIYI SEÇ.', '7 · 4 · 1',4,{visualClass:'compact'})},
+ secondLargest(){return make('İKİNCİ EN BÜYÜK SAYI?', '1 · 8 · 5 · 3',5,{visualClass:'compact'})},
+ rangeOfThree(){return make('EN BÜYÜK İLE EN KÜÇÜĞÜN FARKI?', '1 · 7 · 4',6,{visualClass:'compact'})},
+ digitSumInvariant(){return make('31’İN RAKAMLARI TOPLAMINI BUL; TERSTEN OKUSAN DEĞİŞİR Mİ?', '31 ↔ 13',4,{visualClass:'compact'})},
+ unitsFibonacci(){return make('SIRADAKİ SAYININ SADECE BİRLER BASAMAĞINA BAS.', '2 · 3 · 5 · 8 · ?',3,{visualClass:'small'})},
+ unitsDoubling(){return make('DİZİDE SONRAKİ SAYININ BİRLER BASAMAĞI?', '1 · 2 · 4 · 8 · ?',6,{visualClass:'small'})},
+ alternating(){return make('2 ART, 1 AZAL, 2 ART… SIRADAKİ SAYI?', '1 · 3 · 2 · 4 · ?',3,{visualClass:'small'})},
+ allCorrect(){return make('KAÇI DOĞRU? 3>2 VE 2>1 VE 1<2', '3>2 · 2>1 · 1<2',3,{visualClass:'small'})},
+ wrongCompare(){return make('YANLIŞ OLAN EŞİTSİZLİKLERİ SAY.', '2<3 · 5<4 · 7>6 · 1>2',2,{visualClass:'small'})},
+ swapSymbols(){return make('A=2, B=3 İSE A+B KAÇ?', 'A + B',5)},
+ addAfterDivision(){return make('ÖNCE BÖL, SONRA TOPLA.', '8 ÷ 2 + 3',7)},
+ absMinus(){return make('−3’ÜN MUTLAK DEĞERİ?', '|−3|',3)},
+ divideZero(){return make('SIFIRI 5’E BÖLERSEN KAÇ?', '0 ÷ 5',0,{kind:'wait'})},
+ threeSquared(){return make('3 × 3 − 2 KAÇ?', '3 × 3 − 2',7)},
+ digitsInResult(){return make('9+8 İŞLEMİNİN SONUCU KAÇ BASAMAKLI?', '9 + 8 = ?',2)},
+ oddSlots(){return make('SADECE 1., 3. VE 5. SIRADAKİ RAKAMLARI TOPLA.', '1 2 3 4 5',9,{visualClass:'compact'})},
+ countEqualities(){return make('KAÇ İŞLEM DOĞRU?', '1+1=2 · 2+2=5 · 3−1=2',2,{visualClass:'small'})},
+ tomorrowSunday(){return make('YARIN PAZARSA, BUGÜNÜN KAÇINCI GÜN OLDUĞUNU BUL (PZT=1).', '📆',6)},
+ twoInOne(){return make('“BASMA”DA “AS” HARF İKİLİSİ KAÇ KEZ VAR?', 'BASMA',1)},
+ uppercaseB(){return make('KAÇ BÜYÜK B HARFİ VAR?', 'BbBbB',3,{visualClass:'compact'})},
+ sevenFirst(){return make('SAYI 73. İLK RAKAMIN KAÇ EKSİĞİ 5 EDER?', '73',2)},
+ fiftyOne(){return make('51’İN RAKAMLARI TOPLAMI KAÇ?', '51',6)},
+ lastDigitSquares(){return make('3 × 3 × 3 İŞLEMİNİN BİRLER BASAMAĞI KAÇ?', '3³',7)},
+ halvesOfThree(){return make('6’NIN YARISI İLE 4’ÜN YARISINI TOPLA.', '6/2 + 4/2',5)},
+ equalSides(){return make('2 KARENİN KENARLARININ YARISI KAÇ?', '□ □',4)},
+ biggerTruth(){return make('4 > 2 DOĞRU, 2 > 4 YANLIŞ. DOĞRU OLAN KAÇ TANE?', '4>2 / 2>4',1,{visualClass:'compact'})},
+ reverseOrderCount(){return make('5, 4, 3, 2 İÇİNDE AZALMA KAÇ KEZ GERÇEKLEŞİYOR?', '5 → 4 → 3 → 2',3,{visualClass:'compact'})},
+ hiddenTimes(){return make('7 × ? = 0. ? = 0 OLABİLİYORSA HİÇ BASMA.', '7 × 0',0,{kind:'wait'})},
+ targetInside(){return make('TOPLAM 9 OLMASI İÇİN EKSİK SAYI KAÇ?', '4 + ? = 9',5)},
+ threeMinusDouble(){return make('10’UN 3 EKSİĞİNİN 2 FAZLASI KAÇ?', '10 − 3 + 2',9)},
+ notLastOnly(){return make('SIRALAMA 2, 5, 3, 4; EN SON YAZILANIN 1 FAZLASI KAÇ?', '2 · 5 · 3 · 4',5,{visualClass:'compact'})},
+ notLastGreatest(){return make('EN BÜYÜK SAYI SONDA DEĞİL. EN BÜYÜK KAÇ?', '5 · 2 · 1 · 3',5,{visualClass:'compact'})},
+ endBefore(){return make('2, 4, 6, 8: SON TERİMDEN BİR ÖNCEKİ SAYI?', '2 · 4 · 6 · 8',6,{visualClass:'compact'})},
+ bothExpressions(){return make('AYNI SONUCU VEREN KAÇ İŞLEM VAR?', '2+3 · 2×3 · 4+1',2,{visualClass:'small'})},
+ minusOnes(){return make('KAÇ ADET −1 GEREKİR Kİ 5’TEN 2’YE İNELİM?', '5 → 2',3)},
+ oppositeParity(){return make('TEK OLMAYANLARI SAY.', '1 · 2 · 3 · 4 · 5',2,{visualClass:'compact'})},
+ nestedSubtraction(){return make('8 − (4 − 2) KAÇ?', '8 − (4 − 2)',6)},
+ missingHalf(){return make('HANGİ SAYIYI İKİYE BÖLÜNCE 3 EDER?', '? ÷ 2 = 3',6)},
+ zeroOrOne(){return make('“0 VE 1” İÇİNDE KAÇ ÇİFT RAKAM VAR?', '0 / 1',1)},
+ lastFirstRatio(){return make('9 VE 3 SAYILARININ BÖLÜMÜ?', '9 ÷ 3',3)},
+ hiddenSquares(){return make('BİRİNCİ SAYININ KARESİNİN İKİNCİ SAYIYA FARKI?', '3, 5',4)},
+ wordMiddle(){return make('“KAPAK” KELİMESİNDE ORTADAKİ HARF KAÇINCI?', 'KAPAK',3)},
+ triangleAfterSquare(){return make('KARENİN KÖŞELERİNDEN 1 EKSİĞİ KAÇ?', '□ − 1',3)},
+ halfOfHalf(){return make('8’İN YARISININ YARISI?', '8 → 4 → ?',2)}
+};
+Object.assign(allQuestions,expert);
+
+// Fun-first challenge decks, now fully blended at every level.
+const playfulBank={"1":[{"id":"fun_1_000","text":"YARIŞTA İKİNCİYİ GEÇTİN. KAÇINCISIN?","visual":"🏃‍♀️ 🏃","target":2,"why":"İkinciyi geçince ikinci olursun.","extra":{}},{"id":"fun_1_001","text":"HOROZ GÜNDE KAÇ YUMURTA YUMURTLAR?","visual":"🐓🥚","target":0,"why":"Horoz yumurtlamaz!","extra":{"kind":"wait"}},{"id":"fun_1_002","text":"3 ELMADAN 2’SİNİ ALDIN. SENDE KAÇ ELMA VAR?","visual":"🍎🍎🍎","target":2,"why":"İkisini sen aldın, sende iki elma var.","extra":{}},{"id":"fun_1_003","text":"BOŞ BİR ÇANTAYA EN FAZLA KAÇ ELMA KOYABİLİRSİN?","visual":"👜🍎","target":1,"why":"İlk elmayı koyduktan sonra çanta boş değildir.","extra":{}},{"id":"fun_1_004","text":"BİR KEDİ “HAV!” DEDİ. KAÇ KÖPEK VAR?","visual":"🐈 «HAV!»","target":0,"why":"Havlayan bir kedi var; köpek yok.","extra":{"kind":"wait"}},{"id":"fun_1_005","text":"TEK AYAKTA DURAN TAVUĞUN KAÇ AYAĞI VAR?","visual":"🐔","target":2,"why":"Tek ayakta dursa da iki ayağı var.","extra":{}},{"id":"fun_1_006","text":"2 BABA VE 2 OĞUL EN AZ KAÇ KİŞİDİR?","visual":"👴👨👦","target":3,"why":"Dede, baba ve oğul: toplam üç kişi.","extra":{}},{"id":"fun_1_007","text":"İKİ YARIM SANDVİÇ KAÇ TAM SANDVİÇ EDER?","visual":"🥪 ½ + ½","target":1,"why":"İki yarım bir tam yapar.","extra":{}},{"id":"fun_1_008","text":"DÜNYADA KAÇ TANE “SEN” VAR?","visual":"🫵","target":1,"why":"Sen bir tanesin.","extra":{}},{"id":"fun_1_009","text":"KİMSE YOKSA KAPIDA KAÇ KİŞİ BEKLİYOR?","visual":"🚪","target":0,"why":"Kimse yoksa bekleyen kişi de yok.","extra":{"kind":"wait"}},{"id":"fun_1_010","text":"İKİ ELİNDE TOPLAM KAÇ BAŞPARMAK VAR?","visual":"👐","target":2,"why":"Her elde bir başparmak bulunur.","extra":{}},{"id":"fun_1_011","text":"BİR ÇİFT AYAKKABIDA KAÇ AYAKKABI VAR?","visual":"👟 👟","target":2,"why":"Bir çift iki tek demektir.","extra":{}},{"id":"fun_1_012","text":"KEDİNİN 4 PATİSİ VAR. KAÇ KUYRUĞU VAR?","visual":"🐈","target":1,"why":"Dört pati ama bir kuyruk!","extra":{}},{"id":"fun_1_013","text":"BİR MASADA 4 SANDALYE VAR. KAÇ MASA VAR?","visual":"🪑🪑🪑🪑","target":1,"why":"Dört sandalye, bir masa.","extra":{}},{"id":"fun_1_014","text":"KIRMIZI IŞIKTA GEÇMİYORSUN. KAÇ KEZ BAS?","visual":"🔴🚦","target":0,"why":"Kırmızı ışık dur demek.","extra":{"kind":"wait"}},{"id":"fun_1_015","text":"BİR ARABADA 4 TEKER VAR. DİREKSİYON KAÇ?","visual":"🚗","target":1,"why":"Arabanın direksiyonu bir tane.","extra":{}},{"id":"fun_1_016","text":"İKİ GÖZÜN VAR. KAÇ BURUNUN VAR?","visual":"👀👃","target":1,"why":"İki göz ama bir burun.","extra":{}},{"id":"fun_1_017","text":"BİR BALIK DENİZDE KAÇ ŞEMSİYE AÇAR?","visual":"🐟☂️","target":0,"why":"Balık şemsiye açmaz!","extra":{"kind":"wait"}},{"id":"fun_1_018","text":"ASLANI GÖRÜNCE SADECE BİR KEZ BAS!","visual":"🐯","target":1,"why":"Kaplan başka, aslan başka.","extra":{"kind":"reveal","triggerAt":0.49,"laterVisual":"🦁"}},{"id":"fun_1_019","text":"SÜRECE 1 SANİYE SARIL: BASILI TUT!","visual":"🤝","target":1,"why":"Bir saniye boyunca bırakmamalıydın.","extra":{"kind":"hold"}},{"id":"fun_1_020","text":"YAZI “BASMA” DİYOR. TERSİNİ YAP!","visual":"BASMA","target":1,"why":"BASMA komutunun tersi BAS.","extra":{}},{"id":"fun_1_021","text":"ÜÇ NOKTAYI SAY. VİRGÜLÜ SAYMA.","visual":"● ● , ●","target":3,"why":"Üç nokta ve bir virgül var.","extra":{}},{"id":"fun_1_022","text":"YAZIYA DEĞİL RENKTEKİ İPUCUNA BAK: KIRMIZIYSA BAS.","visual":"<span style=\"color:#fff\">KIRMIZI</span>","target":0,"why":"Kelime kırmızı diyor ama yazı beyaz.","extra":{"kind":"wait"}},{"id":"fun_1_023","text":"KEDİYİ GÖRÜNCE BASMA. ASLANI BEKLE!","visual":"🐈","target":1,"why":"Aslan gelmeden basmamalıydın.","extra":{"kind":"reveal","triggerAt":0.52,"laterVisual":"🦁"}},{"id":"fun_1_024","text":"SAĞINDAKİ ELİNDE KAÇ SERÇE PARMAK VAR?","visual":"🤚","target":1,"why":"Bir elin bir serçe parmağı vardır.","extra":{}},{"id":"fun_1_025","text":"GÖRÜNEN YILDIZLARIN UÇLARINI DEĞİL SAYISINI BUL.","visual":"⭐ ⭐ ⭐","target":3,"why":"Yıldız sayısı üç; uçları değil.","extra":{}},{"id":"fun_1_026","text":"ÜÇ KEDİ GÖRDÜN. KAÇ TANESİ KÖPEK?","visual":"🐈🐈🐈","target":0,"why":"Üçü de kedi.","extra":{"kind":"wait"}}],"2":[{"id":"fun_2_000","text":"ALTI HARFLİ “ÜÇ” KELİMESİ VAR MI? VARSA BAS.","visual":"ÜÇ","target":0,"why":"ÜÇ üç harflidir.","extra":{"kind":"wait"}},{"id":"fun_2_001","text":"“BASMA” KELİMESİ “BAS” İLE BAŞLIYOR MU?","visual":"BASMA","target":1,"why":"Evet, ilk üç harf BAS.","extra":{}},{"id":"fun_2_002","text":"SÖZÜ VERMEK KOLAY, TUTMAK ZOR. KAÇ “TUTMAK” VAR?","visual":"TUTMAK","target":1,"why":"Ekranda TUTMAK bir kez yazıyor.","extra":{}},{"id":"fun_2_003","text":"4 KARDEŞİN 1 ORTAK ABLASI VAR. TOPLAM KAÇ ÇOCUK?","visual":"👦👦👦👦👧","target":5,"why":"Hepsinin aynı ablası var: dört + bir.","extra":{}},{"id":"fun_2_004","text":"1 ÇİFT ÇORAPTA KAÇ DELİK VAR? (AĞIZLARI SAY)","visual":"🧦 🧦","target":2,"why":"Her çorabın ayak girişi bir tane.","extra":{}},{"id":"fun_2_005","text":"“BİR BİR BİR” KAÇ KELİMEDİR?","visual":"BİR BİR BİR","target":3,"why":"Aynı kelime olsa da üç kez yazılmış.","extra":{}},{"id":"fun_2_006","text":"“BİR BİR BİR” KAÇ FARKLI KELİMEDİR?","visual":"BİR BİR BİR","target":1,"why":"Hepsi aynı sözcük.","extra":{}},{"id":"fun_2_007","text":"“YOK” YAZISINDA KAÇ “VAR” KELİMESİ VAR?","visual":"YOK","target":0,"why":"YOK kelimesinde VAR yazmıyor.","extra":{"kind":"wait"}},{"id":"fun_2_008","text":"BEN “İKİ” DEDİM. KAÇ HARF DUYDUN?","visual":"İKİ","target":3,"why":"İ-K-İ: üç harf.","extra":{}},{"id":"fun_2_009","text":"BİR KİTAP ÜZERİNDE İKİ GÖZ VAR. GÖZLER KİMİN?","visual":"👀📖","target":2,"why":"İki göz, kitabı okuyan kişinin gözleri.","extra":{}},{"id":"fun_2_010","text":"“ASLAN” KELİMESİNDE KAÇ “A” VAR?","visual":"ASLAN","target":2,"why":"ASLAN iki A içerir.","extra":{}},{"id":"fun_2_011","text":"“ARABA” KELİMESİNDE KAÇ HARF VAR?","visual":"ARABA","target":5,"why":"Tekerleği yok ama beş harfi var.","extra":{}},{"id":"fun_2_012","text":"ŞEMSİYE AÇILDIĞINDA KAÇ KULP TUTARSIN?","visual":"☂️","target":1,"why":"Bir şemsiyenin bir kulpu var.","extra":{}},{"id":"fun_2_013","text":"“KEDİ” YAZISINDA KAÇ FARKLI HARF VAR?","visual":"KEDİ","target":4,"why":"K, E, D, İ: dört farklı harf.","extra":{}},{"id":"fun_2_014","text":"“ANANAS”TA KAÇ TANE “AN” VAR?","visual":"ANANAS","target":2,"why":"AN dizisi iki kez var.","extra":{}},{"id":"fun_2_015","text":"“BAS” İLE “BASMA” KAÇ AYRI KELİME?","visual":"BAS / BASMA","target":2,"why":"BAS ve BASMA iki ayrı sözcük.","extra":{}},{"id":"fun_2_016","text":"KEDİ HAVLARSA KAÇ HAYVAN VAR?","visual":"🐈 «HAV»","target":1,"why":"Sesini değiştirse bile tek kedi var.","extra":{}},{"id":"fun_2_017","text":"İSMİ “DÖRT” OLAN KAÇ KELİME VAR?","visual":"DÖRT DÖRT","target":2,"why":"İki tane DÖRT sözcüğü var.","extra":{}},{"id":"fun_2_018","text":"GÖRÜNENLERİN KAÇI GÜLEBİLİR?","visual":"🙂 🪨 🙂","target":2,"why":"Taş değil, iki yüz gülebilir.","extra":{}},{"id":"fun_2_019","text":"TÜM KİTAPLARI TERS ÇEVİRDİN. KAÇ KİTAP KALDI?","visual":"📚📚📚","target":3,"why":"Kitaplar ters döndü, kaybolmadı.","extra":{}},{"id":"fun_2_020","text":"ÜÇ MUM SÖNDÜ; MASADAKİ MUM SAYISI DEĞİŞTİ Mİ?","visual":"🕯️🕯️🕯️","target":0,"why":"Sönünce mum sayısı değişmez.","extra":{"kind":"wait"}},{"id":"fun_2_021","text":"İKİ KEZ HIZLICA DOKUN, SONRA DUR!","visual":"⚡⚡","target":2,"why":"İki dokunuş arasındaki süre çok uzamamalı.","extra":{"kind":"quick"}},{"id":"fun_2_022","text":"“BEN” VE “SEN” KAÇ FARKLI KELİME?","visual":"BEN / SEN","target":2,"why":"BEN ve SEN iki farklı sözcük.","extra":{}},{"id":"fun_2_023","text":"“KAPI” KELİMESİNDE İLK HARF KAÇINCI?","visual":"KAPI","target":1,"why":"İlk harf her zaman birincidir.","extra":{}},{"id":"fun_2_024","text":"ÜÇ GÜLEN YÜZDEN KAÇI MUTLU GÖRÜNÜYOR?","visual":"😀😁😄","target":3,"why":"Üçü de mutlu görünüyor.","extra":{}},{"id":"fun_2_025","text":"HEPSİ AYNI HARF Mİ? EVETSE BAS.","visual":"A A A","target":1,"why":"Üçü de A.","extra":{}},{"id":"fun_2_026","text":"TAM 1 KEZ “BAS” YAZIYORSA BAS.","visual":"BAS BAS","target":0,"why":"BAS iki kez yazıyor.","extra":{"kind":"wait"}},{"id":"fun_2_027","text":"BU YAZIDA KAÇ FARKLI HAYVAN ADI VAR?","visual":"KEDİ KÖPEK KEDİ","target":2,"why":"Kedi ve köpek: iki farklı hayvan.","extra":{}},{"id":"fun_2_028","text":"“MİYAV” SESİNİ ÇIKARAN HAYVANIN KAÇ KUYRUĞU?","visual":"🐈","target":1,"why":"Kedinin bir kuyruğu var.","extra":{}},{"id":"fun_2_029","text":"KIRMIZI OLAN KALPLERİ DEĞİL, BEYAZLARI SAY.","visual":"<span style=\"color:#ff3859\">♥♥♥</span><span style=\"color:#fff\">♥♥</span>","target":2,"why":"İki beyaz kalp var.","extra":{}},{"id":"fun_2_030","text":"“ÇORUM” KELİMESİNDE KAÇ FARKLI ÜNLÜ VAR?","visual":"ÇORUM","target":2,"why":"O ve U iki farklı ünlüdür.","extra":{}},{"id":"fun_2_031","text":"BU CÜMLEDEKİ “BU” SAYISI KADAR BAS.","visual":"BU BU","target":2,"why":"Görüntüde iki BU var.","extra":{}},{"id":"fun_2_032","text":"SENİNKİ DAHA BÜYÜK OLSUN: KAÇ “KÜÇÜK” VAR?","visual":"KÜÇÜK KÜÇÜK","target":2,"why":"KÜÇÜK iki kez yazıyor.","extra":{}},{"id":"fun_2_033","text":"İKİ YUMURTADAN HANGİSİ DAHA YUMURTA? İKİSİNİ SAY.","visual":"🥚🥚","target":2,"why":"İkisi de yumurta!","extra":{}},{"id":"fun_2_034","text":"“KIRMIZI” YAZISINI DEĞİL RENK TONUNU KONTROL ET.","visual":"<span style=\"color:#ff3155\">MAVİ</span>","target":1,"why":"MAVİ yazıyor ama harfler kırmızı.","extra":{"kind":"count"}}],"3":[{"id":"fun_3_000","text":"KARANLIK ODADA MUM VE LAMBA VAR. ÖNCE KAÇ KİBRİT YAKARSIN?","visual":"🕯️💡🔥","target":1,"why":"Önce bir kibrit yakarsın.","extra":{}},{"id":"fun_3_001","text":"ELEKTRİKLİ TRENİN DUMANI KAÇ TARAFA GİDER?","visual":"🚆⚡","target":0,"why":"Elektrikli trenin dumanı olmaz.","extra":{"kind":"wait"}},{"id":"fun_3_002","text":"BİR AĞAÇTA 4 KUŞ VAR. HEPSİ UÇTU. KAÇI AĞAÇTA?","visual":"🌳🐦🐦🐦🐦","target":0,"why":"Hepsi uçtu.","extra":{"kind":"wait"}},{"id":"fun_3_003","text":"OTOBÜSÜ SEN KULLANIYORSUN. ŞOFÖRÜN KAÇ BURNUN VAR?","visual":"🚌🫵","target":1,"why":"Şoför sensin, bir burnun var.","extra":{}},{"id":"fun_3_004","text":"BİR ÇİFT ELDİVEN ALDIN. KAÇ SOL ELDİVENİN VAR?","visual":"🧤🧤","target":1,"why":"Çiftin biri sağ, biri sol.","extra":{}},{"id":"fun_3_005","text":"İKİ ANNE VE İKİ KIZ GEZDİ. EN AZ KAÇ KİŞİ?","visual":"👵👩👧","target":3,"why":"Anneanne, anne ve kız olabilir.","extra":{}},{"id":"fun_3_006","text":"BOŞ BİR BARDAĞI DOLDURMADAN NASIL AĞIRLAŞTIRIRSIN? BASMA.","visual":"🥛","target":0,"why":"Komut BASMA; açıklamayı düşünürken dokunma.","extra":{"kind":"wait"}},{"id":"fun_3_007","text":"ÜÇ KİŞİ İKİ KOLTUKTA OTURDU. KOLTUK SAYISI KAÇ?","visual":"🛋️ 🛋️","target":2,"why":"Kişi sayısı değil, koltuk sayısı soruluyor.","extra":{}},{"id":"fun_3_008","text":"KIRMIZI TOPU SİLERSEN GÖRÜNTÜDE KAÇ MAVİ TOP KALIR?","visual":"<span style=\"color:red\">●</span><span style=\"color:#50baff\">●●●</span>","target":3,"why":"Mavi toplar üç tane.","extra":{}},{"id":"fun_3_009","text":"İKİ KEZ “YOK” DEDİN. KAÇ KEZ KONUŞTUN?","visual":"YOK! YOK!","target":2,"why":"YOK diye iki kez konuştun.","extra":{}},{"id":"fun_3_010","text":"5 KEDİ HAVLASA, KAÇI KEDİ OLMAKTAN ÇIKAR? KEDİLERİ SAY.","visual":"🐈🐈🐈🐈🐈","target":5,"why":"Beşi de hâlâ kedi.","extra":{}},{"id":"fun_3_011","text":"3 KİŞİ HATA YAPTI, KAÇ KİŞİ DERS ALABİLİR?","visual":"🙈🙉🙊","target":3,"why":"Üçü de ders alabilir.","extra":{}},{"id":"fun_3_012","text":"KEDİYE “ASLAN” DEDİN. KAÇ KEDİ KALDI?","visual":"🐈 “ASLAN”","target":1,"why":"Adı değişse de kendisi kedi.","extra":{}},{"id":"fun_3_013","text":"BALIK ŞEMSİYE TAŞIMIYOR. KAÇ BALIK VAR?","visual":"🐟☂️","target":1,"why":"Bir balık var; şemsiyeyi taşımıyor.","extra":{}},{"id":"fun_3_014","text":"TERSTEN DE AYNI OKUNANLARI SAY.","visual":"KEK · ATA · ELMA","target":2,"why":"KEK ve ATA tersten de aynıdır.","extra":{"visualClass":"small"}},{"id":"fun_3_015","text":"KELİMEDEKİ KEDİ SAYISI DEĞİL, EMOJİ SAYISI!","visual":"KEDİ 🐈 🐈","target":2,"why":"KEDİ kelimesi bir emoji değildir.","extra":{}},{"id":"fun_3_016","text":"KÖPEK İSMİ “KEDİ”. KAÇ KÖPEK VAR?","visual":"🐕 “KEDİ”","target":1,"why":"Adı KEDİ olsa da hayvan bir köpek.","extra":{}},{"id":"fun_3_017","text":"BU YAZI “GÖRÜNMEZ” DİYOR. KAÇ YAZI GÖRÜNÜYOR?","visual":"GÖRÜNMEZ","target":1,"why":"Kelime görünür durumda.","extra":{}},{"id":"fun_3_018","text":"KAÇ “KAPI” KELİMESİ VAR? KAPI RESMİNİ SAYMA.","visual":"KAPI 🚪 KAPI","target":2,"why":"İki yazı, bir kapı simgesi.","extra":{"visualClass":"compact"}},{"id":"fun_3_019","text":"BİR KARDEŞİN VAR, ONUN DA BİR KARDEŞİ VAR. EN AZ KAÇ KİŞİ?","visual":"👫","target":2,"why":"O kardeş sen olabilirsin.","extra":{}},{"id":"fun_3_020","text":"DÜN YARIN OLSAYDI BUGÜN... BOŞ VER: BUTONA DOKUNMA!","visual":"🤯","target":0,"why":"Bulmaca değil, son komut geçerli.","extra":{"kind":"wait"}},{"id":"fun_3_021","text":"BÜTÜN BALONLAR PATLADI. KAÇ PATLAMA OLDU?","visual":"🎈🎈🎈💥","target":3,"why":"Üç balon patladı.","extra":{}},{"id":"fun_3_022","text":"BÖCEĞE “KUŞ” DEDİN. KAÇ BÖCEK KALDI?","visual":"🐞","target":1,"why":"Ad değişse de böcek bir tane.","extra":{}},{"id":"fun_3_023","text":"ÜÇ ÇOCUK DONDURMA YEDİ. KAÇ ÇOCUK KALDI?","visual":"🧒🧒🧒🍦","target":3,"why":"Dondurma bitti, çocuklar değil.","extra":{}},{"id":"fun_3_024","text":"ÇORBAYI ÇATALLA İÇTİN. KAÇ ÇATAL KULLANDIN?","visual":"🍜🍴","target":1,"why":"Kaşık kullanmasan da bir çatal kullandın.","extra":{}},{"id":"fun_3_025","text":"KİTABI TERSTEN TUTTUN. KAÇ KİTAP VAR?","visual":"📖","target":1,"why":"Ters çevirince bir kitap kalır.","extra":{}},{"id":"fun_3_026","text":"YALNIZCA HAYVANLARIN SAYISINI BUL, SESLERİNİ DEĞİL.","visual":"🐄 MÖÖ 🐕 HAV","target":2,"why":"İki hayvan ve iki ses yazısı var.","extra":{}},{"id":"fun_3_027","text":"HER YER “BAS” DİYOR; ÜSTTE “BASMA” YAZIYOR.","visual":"BAS BAS BAS","target":0,"why":"Üstteki komut basma diyor.","extra":{"kind":"wait"}},{"id":"fun_3_028","text":"ŞU KELİMEDE KAÇ TANE SAYI ADI GİZLİ?","visual":"BİRİNCİ","target":1,"why":"BİR kelimesi başlangıcında var.","extra":{}},{"id":"fun_3_029","text":"GÜLEN YÜZ GÖRÜNCE BAS; ASIK YÜZÜ DEĞİL.","visual":"😠","target":1,"why":"Önce asık yüz var, sonra gülen yüz gelir.","extra":{"kind":"reveal","triggerAt":0.5,"laterVisual":"😁"}},{"id":"fun_3_030","text":"SİYAH KEDİ İSTEDİM; SİYAH EKRAN YETER Mİ? EVETSE BAS.","visual":"⬛","target":0,"why":"Siyah kare bir kedi değil.","extra":{"kind":"wait"}},{"id":"fun_3_031","text":"BU KEZ BUTONA 1 SANİYE BASILI TUT, TIKLAMA.","visual":"⏳","target":1,"why":"Bir saniye basılı tutmalısın.","extra":{"kind":"hold"}},{"id":"fun_3_032","text":"KEDİ, KEDİ, ASLAN. GERÇEK KEDİ EMOJİSİ KAÇ?","visual":"🐈 🐈 🦁","target":2,"why":"Aslanı saymamalısın.","extra":{}},{"id":"fun_3_033","text":"KÖPEĞİ BEKLE, HAV YAZISINA ALDANMA.","visual":"«HAV»","target":1,"why":"Gerçek köpek emojisi görünene kadar bekle.","extra":{"kind":"reveal","triggerAt":0.55,"laterVisual":"🐕"}},{"id":"fun_3_034","text":"ÜÇ KEZ “SUS” YAZDIM. KAÇ KELİME OLDU?","visual":"SUS SUS SUS","target":3,"why":"Üç defa SUS yazıldı.","extra":{}},{"id":"fun_3_035","text":"KOŞAN İKİ ADAMDAN BİRİ DURDU. KAÇ KİŞİ VAR?","visual":"🏃 🧍","target":2,"why":"Durmak, yok olmak değildir.","extra":{}},{"id":"fun_3_036","text":"İKİ TANE “İKİ” YAZIYOR. KAÇ KELİME VAR?","visual":"İKİ İKİ","target":2,"why":"İki kelime.","extra":{}},{"id":"fun_3_037","text":"“ÇORUM” YAZDIN. KAÇ KELİME YAZDIN?","visual":"ÇORUM","target":1,"why":"Bir kelime yazdın.","extra":{}},{"id":"fun_3_038","text":"BEŞ SANDALYE BOŞ. KAÇ SANDALYE VAR?","visual":"🪑🪑🪑🪑🪑","target":5,"why":"Boş olsa da beş sandalye var.","extra":{}},{"id":"fun_3_039","text":"CANAVARI BEKLE; EMOJİ GELMEDEN BASMA!","visual":"???","target":1,"why":"Canavar gelince bir kez bas.","extra":{"kind":"reveal","triggerAt":0.53,"laterVisual":"👹"}},{"id":"fun_3_040","text":"ELLERİ DEĞİL, KAÇ EL GÖRÜNÜYOR?","visual":"✋ ✋","target":2,"why":"İki el emojisi var.","extra":{}},{"id":"fun_3_041","text":"TELEFONUN 2 KAMERASI VAR, RESİMDE KAÇ TELEFON?","visual":"📱","target":1,"why":"Tek bir telefon resmi var.","extra":{}},{"id":"fun_3_042","text":"ASLAN MİYAVLADI. KAÇ ASLAN KALDI?","visual":"🦁","target":1,"why":"Sesi değişti, kendisi aslan.","extra":{}},{"id":"fun_3_043","text":"GÖZÜNÜ KAPATIRSAN EKRANDA KAÇ BUTON KALIR?","visual":"🔴","target":1,"why":"Görmesen de buton kaybolmaz.","extra":{}},{"id":"fun_3_044","text":"UÇAN KEDİ HAYAL ETTİN. KAÇ HAYAL KURDUN?","visual":"🐈☁️","target":1,"why":"Bir uçan kedi hayali kurdun.","extra":{}},{"id":"fun_3_045","text":"“MAVİ” YAZISINA BAK. HARFLER KIRMIZIYSA BAS.","visual":"<span style=\"color:#ff334f\">MAVİ</span>","target":1,"why":"Harfler kırmızı, kelime MAVİ.","extra":{}},{"id":"fun_3_046","text":"İKİ ŞEMSİYE AÇIK, YAĞMUR YOK. ISLANAN KAÇ?","visual":"☂️☂️☀️","target":0,"why":"Yağmur yoksa ıslanan kimse yok.","extra":{"kind":"wait"}},{"id":"fun_3_047","text":"DÖRT YILDIZIN BİRİ AY. KAÇ YILDIZ VAR?","visual":"⭐ ⭐ 🌙 ⭐","target":3,"why":"Üç yıldız, bir ay var.","extra":{}},{"id":"fun_3_048","text":"YAZIYI HATIRLA; KAYBOLUNCA YAZDIĞI KADAR BAS.","visual":"3","target":3,"why":"Kaybolan sayı üçtü.","extra":{"kind":"memoryFlash","hideAfter":1200}},{"id":"fun_3_049","text":"“YANLIŞ” KELİMESİ YAZIYOR. YANLIŞ HARF VAR MI? VARSA BAS.","visual":"YANLIŞ","target":0,"why":"YANLIŞ kelimesi doğru yazılmış.","extra":{"kind":"wait"}},{"id":"fun_3_050","text":"FOTOĞRAFTA 1 KİŞİ GİZLENDİ. KAÇ KİŞİ VAR?","visual":"🌳👤","target":1,"why":"Gizlenince yok olmaz.","extra":{}},{"id":"fun_3_051","text":"KÜÇÜK KÖPEK İSTİYORUM, KOCAMAN YAZI YETMEZ.","visual":"<span style=\"font-size:.75em\">KÖPEK</span>","target":0,"why":"Kelime bir köpek resmi değildir.","extra":{"kind":"wait"}},{"id":"fun_3_052","text":"İKİ KAPIYI YAN YANA KOYDUN. KAÇ KAPI OLDU?","visual":"🚪 🚪","target":2,"why":"İki kapı var.","extra":{}},{"id":"fun_3_053","text":"KAÇ TANE “HAHA” SESİ DUYDUN?","visual":"HAHA HAHA","target":0,"why":"Yazı var ama ses duymadın.","extra":{"kind":"wait"}},{"id":"fun_3_054","text":"SEN GİDERSEN SENİN GÖLGENİN SAHİBİ KİM?","visual":"🫵","target":1,"why":"Gölgen senindir; sahibi bir kişi.","extra":{}},{"id":"fun_3_055","text":"EKRANDA FİL GÖRÜNENE KADAR BASMA.","visual":"🐭","target":1,"why":"Fare başka, fil başka.","extra":{"kind":"reveal","triggerAt":0.49,"laterVisual":"🐘"}}],"4":[{"id":"fun_4_000","text":"TRAFİK POLİSİ “DUR” DEDİ, TABELA “GİT”. NE YAPARSIN?","visual":"🛑","target":0,"why":"Polisin dur emrine uyarsın.","extra":{"kind":"wait"}},{"id":"fun_4_001","text":"GÖZLÜK TAKAN KEDİNİN KAÇ KUYRUĞU VAR?","visual":"🐈🕶️","target":1,"why":"Gözlüğün kuyruğa etkisi yok.","extra":{}},{"id":"fun_4_002","text":"KONUŞMADAN “EVET” YAZDIN. KAÇ KELİME YAZDIN?","visual":"EVET","target":1,"why":"Ses yok, yazılan bir kelime var.","extra":{}},{"id":"fun_4_003","text":"“KAYBOL” DİYEN YAZI KAYBOLDU MU? EVETSE BAS.","visual":"KAYBOL","target":0,"why":"Yazı hâlâ ekranda.","extra":{"kind":"wait"}},{"id":"fun_4_004","text":"“KIRMIZI” YAZISININ KENDİSİ BEYAZSA BASMA.","visual":"<span style=\"color:#fff\">KIRMIZI</span>","target":0,"why":"Kelimeden değil renkten karar vermelisin.","extra":{"kind":"wait"}},{"id":"fun_4_005","text":"KEDİYE “ASLAN” DEDİM. KAÇ KEDİ KALDI?","visual":"🐈","target":1,"why":"Bir kedi hâlâ kedi.","extra":{}},{"id":"fun_4_006","text":"SAHNEDE 3 SESSİZ PALYAÇO VAR. KAÇ PALYAÇO?","visual":"🤡🤡🤡","target":3,"why":"Sessiz bile olsalar üç palyaço var.","extra":{}},{"id":"fun_4_007","text":"3 ÇORAP GİYDİN. KAÇ ÇORABIN VAR?","visual":"🧦🧦🧦","target":3,"why":"Giydiğin çoraplar hâlâ var.","extra":{}},{"id":"fun_4_008","text":"ZEBRA PEMBE OLMADI. KAÇ ZEBRA HALA ZEBRA?","visual":"🦓","target":1,"why":"Rengini konuşmak zebrayı değiştirmez.","extra":{}},{"id":"fun_4_009","text":"İKİ ELİN DOLU. KAÇ ELİN VAR?","visual":"✋✋","target":2,"why":"İki elin var, üçüncü yok.","extra":{}},{"id":"fun_4_010","text":"ÜÇ ELMA ÇİZDİM, HİÇBİRİNİ YEMEDİM. KAÇ ELMA RESMİ?","visual":"🍎 🍎 🍎","target":3,"why":"Resimleri yemediğin için üçü de var.","extra":{}},{"id":"fun_4_011","text":"BU YAZIDA “YOK” YOKSA BİR KEZ BAS.","visual":"YOK","target":0,"why":"YOK kelimesi orada; koşul yanlış.","extra":{"kind":"wait"}},{"id":"fun_4_012","text":"BU YAZIDA “VAR” VARSA BİR KEZ BAS.","visual":"VAR","target":1,"why":"VAR kelimesi gerçekten orada.","extra":{}},{"id":"fun_4_013","text":"“BAS” YAZISINA DEĞİL, DUR İŞARETLERİNE BAK. KAÇ DUR?","visual":"BAS 🛑🛑","target":2,"why":"İki dur işareti görünmekte.","extra":{}},{"id":"fun_4_014","text":"1 ÇİFT TERLİĞİ AYIRDIN. KAÇ TERLİK KALDI?","visual":"🩴 🩴","target":2,"why":"Ayırınca da iki terlik.","extra":{}},{"id":"fun_4_015","text":"GÖZÜNÜN ÖNÜNDEKİ “GÖRÜNMEZ” YAZISINI SAY.","visual":"GÖRÜNMEZ","target":1,"why":"Görünmez sözcüğü görünür hâlde.","extra":{}},{"id":"fun_4_016","text":"DÜKKÂN AÇIK, KASA BOŞ. KAÇ DÜKKÂN VAR?","visual":"🏪","target":1,"why":"Bir dükkân gösteriliyor.","extra":{}},{"id":"fun_4_017","text":"GÜNEŞ BATTI. KAÇ GÜNEŞ BİRDEN BATTI?","visual":"🌃","target":1,"why":"Bir güneşten bahsediliyor.","extra":{}},{"id":"fun_4_018","text":"İKİ AYNAYI KARŞI KARŞIYA KOYDUN. GERÇEK AYNA KAÇ?","visual":"🪞 🪞","target":2,"why":"Yansımalar değil, gerçek aynalar sayılır.","extra":{}},{"id":"fun_4_019","text":"GÜLEN YÜZÜ BEKLE, ÜZÜLEN YÜZE KANMA.","visual":"😭","target":1,"why":"Gülen yüz sonradan görünecek.","extra":{"kind":"reveal","triggerAt":0.57,"laterVisual":"😁"}},{"id":"fun_4_020","text":"BİR KELİMEYİ İKİ DEFA YAZDIM. KAÇ FARKLI KELİME?","visual":"KEDİ KEDİ","target":1,"why":"Aynı kelime iki kez yazıldı.","extra":{}},{"id":"fun_4_021","text":"2 BOŞ AYAKKABI VAR. KAÇ AYAKKABI KALDI?","visual":"👟👟","target":2,"why":"Ayak yok ama ayakkabılar var.","extra":{}},{"id":"fun_4_022","text":"EVDE BİR KAPI AÇIK. KAÇ KAPI VAR?","visual":"🚪","target":1,"why":"Bir kapı olduğu söylendi.","extra":{}},{"id":"fun_4_023","text":"BİRAZ ÖNCE GÖRDÜĞÜN EMOJİ KAYBOLACAK: KEDİ SAYISINI BUL.","visual":"🐈 🐈 🐈","target":3,"why":"Üç kedi gösterildi.","extra":{"kind":"memoryFlash","hideAfter":1200}},{"id":"fun_4_024","text":"YAN YANA ÜÇ İŞARET VAR. İKİSİ DUR, BİRİ GİT: KAÇ DUR?","visual":"🛑 🟢 🛑","target":2,"why":"İki dur işareti.","extra":{}},{"id":"fun_4_025","text":"ANLAMINI DEĞİL, GÖRÜNEN “BAS”LARI SAY.","visual":"BAS BASMA BAS","target":2,"why":"Tam kelime olarak BAS iki defa var.","extra":{}},{"id":"fun_4_026","text":"AYNADA GÖRDÜĞÜN 2 KEDİ GERÇEKTE KAÇ KEDİ?","visual":"🐈 🪞","target":1,"why":"Bir kedi, bir yansıması.","extra":{}},{"id":"fun_4_027","text":"“BU” KELİMESİ VARSA 1 KEZ BAS; “ŞU” VARSA BASMA.","visual":"BU","target":1,"why":"BU var, ŞU yok.","extra":{}},{"id":"fun_4_028","text":"KAPIYA 3 KERE VURDUN. KAÇ KERE KAPIYI ÇALDIN?","visual":"🚪✊✊✊","target":3,"why":"Üç kere kapıyı çaldın.","extra":{}},{"id":"fun_4_029","text":"3 KİŞİ DOĞRU SÖYLÜYOR. KAÇI YALAN SÖYLEMİYOR?","visual":"🙂🙂🙂","target":3,"why":"Üçü de dürüst.","extra":{}},{"id":"fun_4_030","text":"BEYAZ SÖZCÜK KIRMIZI DİYOR. HANGİSİNE İNANACAKSIN?","visual":"<span style=\"color:#fff\">KIRMIZI</span>","target":0,"why":"Harflerin rengi beyaz, kırmızı değil.","extra":{"kind":"wait"}},{"id":"fun_4_031","text":"KİMSE TEBESSÜM ETMİYOR. KAÇ YÜZ VAR?","visual":"😐😐😐","target":3,"why":"Üç yüz var; gülmeseler de.","extra":{}},{"id":"fun_4_032","text":"BİR ŞAPKA, İKİ BAŞ GÖRÜYORSUN. KAÇ ŞAPKA?","visual":"🎩🙂🙂","target":1,"why":"Yalnızca bir şapka var.","extra":{}},{"id":"fun_4_033","text":"“ASLAN” EMOJİSİ GÖRÜNMEDEN BASMA.","visual":"🦓","target":1,"why":"Zebra değil, aslanı beklemeliydin.","extra":{"kind":"reveal","triggerAt":0.58,"laterVisual":"🦁"}},{"id":"fun_4_034","text":"BUTONU TUT, ACELEYLE BIRAKMA.","visual":"✊","target":1,"why":"En az bir saniye basılı tut.","extra":{"kind":"hold"}},{"id":"fun_4_035","text":"ÜÇ GÜLEN YÜZÜN ORTASINDA KAÇ YÜZ VAR?","visual":"🙂🙂🙂","target":1,"why":"Ortada tek yüz var.","extra":{}},{"id":"fun_4_036","text":"YANLIŞ CEVABA 1 KEZ BAS; DOĞRUYA HİÇ BASMA.","visual":"2 + 2 = 5","target":1,"why":"2+2=5 yanlıştır, bir kez basmalıydın.","extra":{}},{"id":"fun_4_037","text":"OTOBÜS İÇİNDE 2 ŞOFÖR VAR. KAÇ DİREKSİYON VAR?","visual":"🚌","target":1,"why":"Bir otobüsün bir direksiyonu bulunur.","extra":{}},{"id":"fun_4_038","text":"MAVİ KELİMESİ KIRMIZI YAZILMIŞSA BİR KEZ BAS.","visual":"<span style=\"color:#ff3155\">MAVİ</span>","target":1,"why":"MAVİ harfleri kırmızı renkte.","extra":{}},{"id":"fun_4_039","text":"İKİ “YANLIŞ” VAR. KAÇ DOĞRU YAZILMIŞ KELİME?","visual":"YANLIŞ YANLIŞ","target":2,"why":"İki kelimenin yazımı da doğru.","extra":{}},{"id":"fun_4_040","text":"ÜÇ KEDİYE “ASLAN” DEDİN. KAÇ KEDİ KALDI?","visual":"🐈🐈🐈","target":3,"why":"Üçü de kedi olarak kalır.","extra":{}},{"id":"fun_4_041","text":"KAPININ DIŞINDA 2 KİŞİ VAR. KAÇ KİŞİ VAR?","visual":"🚪👥","target":2,"why":"İkisi de kapının dışında.","extra":{}},{"id":"fun_4_042","text":"KEDİ “BEN KÖPEĞİM” DİYOR. KAÇ KEDİ VAR?","visual":"🐈💬","target":1,"why":"Konuşunca tür değiştirmiyor.","extra":{}},{"id":"fun_4_043","text":"SON EMOJİYE BAK: KÜÇÜK KÖPEK VAR MI? VARSA BAS.","visual":"🐈 🐀 🐕","target":1,"why":"Son emoji köpek.","extra":{}},{"id":"fun_4_044","text":"BU METİNDEKİ SESLERİ SAYMA, GERÇEK EMOJİYİ SAY.","visual":"HAV! HAV! 🐕","target":1,"why":"İki ses sözcüğü, bir köpek emojisi.","extra":{}},{"id":"fun_4_045","text":"İKİ SÜT ŞİŞESİ BOŞ. KAÇ SÜT ŞİŞESİ VAR?","visual":"🍼🍼","target":2,"why":"Boş olsa da iki şişe bulunuyor.","extra":{}},{"id":"fun_4_046","text":"“BİTTİ” DEDİĞİMDE GERÇEKTEN BİTTİ Mİ? BASMA.","visual":"BİTTİ!","target":0,"why":"Oyun turu henüz bitmedi; basma komutu geçerli.","extra":{"kind":"wait"}},{"id":"fun_4_047","text":"SADECE İKİNCİ “BAS” KELİMESİNİ GÖRÜRSEN 1 KEZ BAS.","visual":"BASMA BAS","target":1,"why":"İkinci bağımsız kelime BAS; BASMA ayrı.","extra":{}},{"id":"fun_4_048","text":"MUMU SÖNDÜRDÜN. KAÇ MUM KALDI?","visual":"🕯️","target":1,"why":"Söndürmek mumu ortadan kaldırmaz.","extra":{}},{"id":"fun_4_049","text":"GÜNEŞİ KAPATTIN, GECE OLDU. KAÇ GÜNEŞ VAR?","visual":"🌙","target":1,"why":"Görünmese de güneş bir tane.","extra":{}},{"id":"fun_4_050","text":"BİRİNİN İSMİ “BEŞ”. KAÇ KİŞİ OLABİLİR?","visual":"👤 BEŞ","target":1,"why":"Adı BEŞ olan kişi hâlâ bir kişi.","extra":{}},{"id":"fun_4_051","text":"ÜÇ ŞEMSİYE AÇILDI. KAÇI ŞEMSİYE OLMAYA DEVAM EDER?","visual":"☂️☂️☂️","target":3,"why":"Açılınca şemsiyeler hâlâ şemsiyedir.","extra":{}},{"id":"fun_4_052","text":"“ŞİMDİ” KELİMESİ GÖRÜNÜNCE BİR KEZ DOKUN.","visual":"AZ SONRA","target":1,"why":"ŞİMDİ yazana kadar beklemeliydin.","extra":{"kind":"trigger","triggerAt":0.47,"laterVisual":"ŞİMDİ","visualClass":"compact"}},{"id":"fun_4_053","text":"KEDİ FOTOĞRAFI YERİNE “KEDİ” YAZDIM. KAÇ FOTOĞRAF?","visual":"KEDİ","target":0,"why":"Kelime fotoğraf değildir.","extra":{"kind":"wait"}},{"id":"fun_4_054","text":"ÜÇ KİŞİ GÜLÜYOR. KAÇI MUTLU GÖRÜNÜYOR?","visual":"😂😂😂","target":3,"why":"Üçü de gülerken mutlu görünüyor.","extra":{}},{"id":"fun_4_055","text":"BASMA DEDİM, DUYDUN MU? SES OLMADIYSA BASMA.","visual":"🔇","target":0,"why":"Yazı ile emir verildi; ses çıkmadı.","extra":{"kind":"wait"}},{"id":"fun_4_056","text":"ÜÇ BEYAZ YILDIZDAN İKİSİ KIRMIZIYA BOYANDI. TOPLAM YILDIZ?","visual":"<span style=\"color:red\">★ ★</span> ★","target":3,"why":"Renk değişimi yıldız sayısını değiştirmez.","extra":{}},{"id":"fun_4_057","text":"SADECE GERÇEK KEDİ EMOJİSİNİ SAY.","visual":"KEDİ 🐈 “🐈”","target":2,"why":"İki kedi emojisi var; sözcük sayılmaz.","extra":{}},{"id":"fun_4_058","text":"BİR TREN GERİ GİDİYOR. KAÇ TREN VAR?","visual":"🚂","target":1,"why":"Yön değişti ama bir tren var.","extra":{}},{"id":"fun_4_059","text":"ÜÇ KİŞİ GİDİYOR, BİRİ GERİ DÖNDÜ. KAÇ KİŞİ VAR?","visual":"🚶🚶🚶","target":3,"why":"Yön değişir, kişi sayısı değişmez.","extra":{}},{"id":"fun_4_060","text":"GÖRÜNEN “GÖRÜNMEZ” SÖZCÜĞÜ KAÇ TANEDİR?","visual":"GÖRÜNMEZ","target":1,"why":"Bir tane görünür GÖRÜNMEZ kelimesi var.","extra":{}},{"id":"fun_4_061","text":"BUTONA BASMA. “BAS” YAZISINA ALDANMA.","visual":"BAS","target":0,"why":"Üst komut BASMA.","extra":{"kind":"wait"}},{"id":"fun_4_062","text":"ŞİFRE 3 BASIŞ: BUTON “DUR” DESE DE 3 KEZ BAS.","visual":"DUR","target":3,"why":"Üstteki 3 basış emri geçerli.","extra":{}},{"id":"fun_4_063","text":"GÖKTE BİR AY, BİR GÜNEŞ, İKİ YILDIZ. KAÇ AY?","visual":"🌙 ☀️ ⭐⭐","target":1,"why":"Ay yalnızca bir tane.","extra":{}},{"id":"fun_4_064","text":"GÖRSELDE KEDİ YOKSA BASMA, VARSA BİR KEZ BAS.","visual":"🐈","target":1,"why":"Bir kedi simgesi var.","extra":{}},{"id":"fun_4_065","text":"ÇİZGİ FİLM FAREYE KEDİ DEDİ. KAÇ FARE KALDI?","visual":"🐭","target":1,"why":"Fareyi kedi diye çağırmak yetmez.","extra":{}},{"id":"fun_4_066","text":"HER YERDE “BAS” YAZIYOR, GERÇEK DÜĞME KAÇ?","visual":"BAS BAS BAS","target":1,"why":"Oyun ekranında bir ana düğme var.","extra":{}},{"id":"fun_4_067","text":"ÜÇ KEZ GÖRDÜĞÜN YAZI “TEK”. KAÇ FARKLI KELİME?","visual":"TEK TEK TEK","target":1,"why":"Tek sözcüğü tekrar ediyor.","extra":{}},{"id":"fun_4_068","text":"“KEDİ KEDİ”DE KAÇ KEDİ FOTOĞRAFI VAR?","visual":"KEDİ KEDİ","target":0,"why":"Yalnızca yazı var, fotoğraf yok.","extra":{"kind":"wait"}}]};
+for(const [group,entries] of Object.entries(playfulBank)){
+  for(const entry of entries){
+    allQuestions[entry.id]=()=>make(entry.text,entry.visual,entry.target,{...entry.extra,why:entry.why});
+  }
+}
+
+// v1.5: ONE SHUFFLED POOL FOR EVERY LEVEL. Only the CLOCK gets harder.
+// Each question receives an explicit gameplay category, not a difficulty tier.
+// Z = surprising logic; K = word/letter trap; G = visual perception;
+// S = absurd/funny story; R = reaction/memory; T = command/obedience trap.
+const categoryGroups={
+ '1':{
+   S:'001,004,005,012,017,026',
+   G:'010,021,022,024,025',
+   R:'018,019,023',
+   T:'014,020'
+ },
+ '2':{
+   K:'000,001,002,005,006,007,008,010,011,013,014,015,017,022,023,025,026,027,030,031,032',
+   G:'018,024,029,033,034',
+   R:'021',
+   S:'016,028'
+ },
+ '3':{
+   K:'009,014,015,017,018,028,034,036,037,049,053',
+   G:'008,026,032,040,041,043,045,047,050,051',
+   R:'029,031,033,039,048,055',
+   T:'020,027',
+   S:'010,012,013,016,022,023,024,042,044,046,054'
+ },
+ '4':{
+   K:'002,003,011,012,015,020,025,027,039,046,047,050,060,067,068',
+   G:'004,006,010,013,024,030,031,032,035,038,043,044,054,056,057,063,064',
+   R:'019,023,033,034,052',
+   T:'000,061,062',
+   S:'001,005,008,040,042,048,049,053,055,065'
+ }
+};
+const mixedPool=[];
+const mixedMeta={};
+for(const [group,entries] of Object.entries(playfulBank)){
+  const catMap={};
+  for(const [cat,ids] of Object.entries(categoryGroups[group])){
+    for(const ix of ids.split(',')) catMap[Number(ix)]=cat;
+  }
+  for(let ix=0;ix<entries.length;ix++){
+    const q=entries[ix];
+    const category=catMap[ix]||'Z';
+    // Additional topic tagging avoids two animal jokes or word riddles in a row.
+    const topic=/KEDİ|KÖPEK|ASLAN|HOROZ|BALIK|TAVUK|KUŞ|BÖCEK|FARE|ZEBRA|FİL|HAYVAN/.test(q.text)?'animal':
+      /KELİME|HARF|YAZI|SÖZCÜK|KONUŞ|İSMİ|AD[Iİ]|SÖZ|SÖY/.test(q.text)?'language':
+      /GÖR|EMOJİ|RENK|KIRMIZI|BEYAZ|MAVİ|YILDIZ|İŞARET/.test(q.text)?'visual':'other';
+    mixedPool.push(q.id);
+    mixedMeta[q.id]={category,topic,group,kind:q.extra.kind||'count'};
+  }
+}
+// Remember previously shown early tasks, including across reloads in the same browser.
+let recentStarts=[];try{recentStarts=JSON.parse(localStorage.getItem('basma_v11_recent_starts')||'[]')}catch(_){}
+if(!Array.isArray(recentStarts))recentStarts=[];
+const usedTemplates=new Set();
+let previousCategory='',previousTopic='',previousGroup='',previousTarget=null;
+let previousTwoCategories=[];
+let categoryUse={};
+function clockStage(n){return n<=10?1:n<=20?2:3}
+function pickTemplate(){
+  let options=mixedPool.filter(id=>!usedTemplates.has(id));
+  if(!options.length)throw new Error('Soru havuzu tükendi');
+  if(level<=10){
+    const fresh=options.filter(id=>!recentStarts.includes(id));
+    if(fresh.length)options=fresh;
+  }
+  // Never serve the same type consecutively; if available also change topic and original bank.
+  let alternate=options.filter(id=>mixedMeta[id].category!==previousCategory);
+  if(alternate.length)options=alternate;
+  alternate=options.filter(id=>mixedMeta[id].topic!==previousTopic);
+  if(alternate.length)options=alternate;
+  alternate=options.filter(id=>mixedMeta[id].group!==previousGroup);
+  if(alternate.length)options=alternate;
+  // Discourage predictable category alternation and long same-answer streaks.
+  let bestId='',bestScore=-Infinity;
+  for(const id of options){
+    const m=mixedMeta[id];
+    const penalty=(categoryUse[m.category]||0)*0.12+(previousTwoCategories.includes(m.category)?1.6:0);
+    const score=Math.random()*4.5-penalty;
+    if(score>bestScore){bestScore=score;bestId=id}
+  }
+  const pick=bestId||choose(options);
+  usedTemplates.add(pick);
+  const m=mixedMeta[pick];
+  previousCategory=m.category;previousTopic=m.topic;previousGroup=m.group;
+  previousTwoCategories=[...previousTwoCategories.slice(-1),m.category];
+  categoryUse[m.category]=(categoryUse[m.category]||0)+1;
+  if(level<=10){
+    recentStarts=[pick,...recentStarts.filter(x=>x!==pick)].slice(0,20);
+    try{localStorage.setItem('basma_v11_recent_starts',JSON.stringify(recentStarts))}catch(_){}
+  }
+  return pick;
+}
+function now(){return performance.now()}
+function vibrate(pattern){try{(typeof navigator.vibrate === "function" ? navigator.vibrate(pattern) : void 0)}catch(_){}}
+function tone(freq,length=.11,type='sine',vol=.12,delay=0){if(!soundOn)return;try{audio=audio||new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();const t=audio.currentTime+delay,o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);if(type==='sawtooth')o.frequency.exponentialRampToValueAtTime(Math.max(45,freq*.48),t+length);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+length);o.connect(g);g.connect(audio.destination);o.start(t);o.stop(t+length+.01)}catch(_){}}
+function badSound(){tone(255,.30,'sawtooth',.18);tone(90,.44,'sawtooth',.14,.13)}function goodSound(){tone(590,.09,'sine',.09);tone(880,.12,'sine',.08,.08)}
+function stats(){el.score.textContent=score.toLocaleString('tr-TR');el.best.textContent=best.toLocaleString('tr-TR');el.hearts.textContent=life>0?'♥':'✕';el.level.textContent=String(level).padStart(2,'0')+' / 100';el.phase.textContent=['KARMA OYUN · 10 SN','KARMA OYUN · 8,5 SN','KARMA OYUN · 7,5 SN'][clockStage(level)-1]}
+function setVisual(v,css){el.visual.innerHTML=v;el.visual.className='visual'+(css?' '+css:'')}
+function calcDuration(){return level<=10?10000:level<=20?8500:7500} // only time changes
+function newRound(){if(!running)return;finished=false;pressing=false;taps=0;confirmAt=0;level++;const type=pickTemplate();current=allQuestions[type]();current.type=type;debugTypes.push(type);if(debugTypes.length>12)debugTypes.shift();duration=calcDuration();started=now();firstTapAt=0;el.feedback.textContent=[11,21].includes(level)?'SÜRE KISALDI!':'';el.feedback.className='feedback';el.btn.classList.remove('ready','dark','pressed');el.question.textContent=current.text;el.hint.textContent=choose(['İlk aklına gelene hemen güvenme.','Bazen kelimeler küçük bir oyun oynar.','Gördüğünü değil, sorulanı cevapla.','Basit görünüyorsa iki kere düşün.','Komik olabilir ama tek hakkın var!']);setVisual(current.visual,current.visualClass);el.btn.setAttribute('aria-label',current.text);el.sub.textContent='DOKUNUŞ: 0';stats();draw(duration);cancelAnimationFrame(frame);frame=requestAnimationFrame(tick)}
+function draw(left){const r=Math.max(0,Math.min(1,left/duration));el.timer.textContent=(Math.max(0,left)/1000).toFixed(1)+' sn';el.bar.style.transform=`scaleX(${r})`;const lit=Math.ceil(r*COUNT);for(let i=0;i<COUNT;i++)segments[i].classList.toggle('lit',i<lit)}
+function updateDynamic(ms){if(!current)return;el.btn.classList.remove('ready','dark');const trigger=(current.triggerMs != null ? current.triggerMs : duration*(current.triggerAt != null ? current.triggerAt : .5));if(['trigger','triggerWhite','reveal'].includes(current.kind)){const ready=ms>=trigger;setVisual(ready?current.laterVisual:current.visual,current.visualClass);el.btn.classList.toggle('ready',ready);el.btn.classList.toggle('dark',!ready);el.sub.textContent=ready?'ŞİMDİ BAS!':'BEKLE...'}else if(current.kind==='hold'){el.sub.textContent=pressing?'BIRAKMA · TUT!':'1 SANİYE BASILI TUT';if(pressing)el.btn.classList.add('ready')}else if(current.kind==='memoryFlash'&&ms>=current.hideAfter){setVisual('???','compact');el.sub.textContent=`DOKUNUŞ: ${taps}`}else if(current.kind==='quick'){el.sub.textContent=`DOKUNUŞ: ${taps} / 2`}else{el.sub.textContent=`DOKUNUŞ: ${taps}`}}
+function tick(t){if(!running||paused||finished)return;const elapsed=t-started,remain=duration-elapsed;draw(remain);updateDynamic(elapsed);if(current.kind==='hold'&&pressing&&t-holdAt>=1000){pressing=false;resolve(true);return}if(current.kind==='quick'&&taps===1&&t-firstTapAt>600){resolve(false,'Çok yavaş! İki kez hızlı basmalıydın.');return}if(confirmAt&&t>=confirmAt){resolve(true);return}if(remain<=0){const ok=current.target===0||(taps===current.target&&current.kind!=='hold');resolve(ok,ok?'':'Süre doldu veya eksik bastın!');return}frame=requestAnimationFrame(tick)}
+function emptyNode(node){while(node.firstChild)node.removeChild(node.firstChild)}
+function burst(){
+  el.damage.classList.remove('active');el.wheel.classList.remove('bad-hit','good-hit');
+  void el.wheel.offsetWidth;el.damage.classList.add('active');el.wheel.classList.add('bad-hit');
+  const explosion=$('explosion'),pieces=$('explosionPieces');emptyNode(pieces);explosion.classList.remove('show');
+  for(let i=0;i<64;i++){
+    const part=document.createElement('i'),a=Math.random()*Math.PI*2,dist=110+Math.random()*Math.max(innerWidth,innerHeight)*.64;
+    part.className='blast-part';part.style.width=(4+Math.random()*20)+'px';part.style.height=(4+Math.random()*24)+'px';
+    part.style.setProperty('--x',(Math.cos(a)*dist).toFixed(1)+'px');part.style.setProperty('--y',(Math.sin(a)*dist).toFixed(1)+'px');
+    part.style.setProperty('--life',(1.1+Math.random()*.85)+'s');part.style.setProperty('--rotation',(Math.random()*950-475)+'deg');
+    part.style.setProperty('--flame',['#ffc83c','#ff331f','#ffed9d','#fe602a','#f91b51'][i%5]);
+    pieces.appendChild(part);
+  }
+  for(let i=0;i<24;i++){
+    const ray=document.createElement('i');ray.className='blast-ray';ray.style.setProperty('--a',(i*15)+'deg');
+    ray.style.setProperty('--distance',(40+Math.random()*110)+'px');ray.style.setProperty('--ray-length',(60+Math.random()*90)+'px');
+    ray.style.setProperty('--ray-width',(3+Math.random()*7)+'px');pieces.appendChild(ray);
+  }
+  void explosion.offsetWidth;explosion.classList.add('show');
+  setTimeout(()=>{explosion.classList.remove('show');emptyNode(pieces);},2250);
+}
+function popError(){const pop=document.createElement('div');pop.className='pop-label';pop.textContent=life===0?'OYUN BİTTİ!':'HATA!';document.body.appendChild(pop);setTimeout(()=>pop.remove(),900)}
+function resolve(ok,error){if(!running||paused||finished)return;finished=true;confirmAt=0;lastRoundPassed=ok;pressing=false;el.btn.classList.remove('pressed');cancelAnimationFrame(frame);clearTimeout(nextTimeout);
+if(ok){const remaining=Math.max(0,duration-(now()-started));score+=100+Math.round(remaining/100)+Math.min(10,streak)*15;cleared++;streak++;lastTaps=current.kind==='hold'?1:taps;lastDecision=(current.kind==='hold'||taps>0)?'press':'wait';el.feedback.textContent=choose(['HARİKA! ✓','DOĞRU HAMLE! ✓','İYİ YAKALADIN! ✓','BEYİN ÇALIŞIYOR! ✓']);el.feedback.className='feedback good';el.wheel.classList.remove('good-hit');void el.wheel.offsetWidth;el.wheel.classList.add('good-hit');goodSound();vibrate(20);if(score>best){best=score;try{localStorage.setItem('basma_red_best_v2',String(best))}catch(_){}}}
+else{life--;streak=0;el.feedback.className='feedback';el.feedback.textContent='YANLIŞ! '+(error||'Kuralı yeniden oku.');burst();badSound();vibrate([110,45,130])}
+stats();nextTimeout=setTimeout(()=>{if(!running||paused)return;if(life<=0)endGame('loss');else if(level>=100&&ok)endGame('win');else{if(level>=100)level=99;newRound()}},ok?700:2350)}
+function onDown(evt){if(evt){evt.preventDefault();if(evt.type==='pointerdown'&&evt.button!==0)return}if(!running||paused||finished||!current)return;if(pressing)return;pressing=true;holdAt=now();el.btn.classList.add('pressed');const elapsed=holdAt-started;if(current.kind==='hold')return;
+pressing=false;
+if(current.target===0){resolve(false,'Basmaman gerekiyordu!');return}
+if(current.kind==='memoryFlash'&&elapsed<current.hideAfter){resolve(false,'Sayı kaybolana kadar beklemeliydin!');return}
+if(['trigger','triggerWhite','reveal'].includes(current.kind)){const ready=elapsed>=(current.triggerMs != null ? current.triggerMs : duration*(current.triggerAt != null ? current.triggerAt : .5));if(!ready){resolve(false,'Doğru anı beklemeliydin!');return}}
+if(current.kind==='quick'){if(taps===0){taps=1;firstTapAt=holdAt;tone(450,.07,'sine',.08)}else if(holdAt-firstTapAt>600){resolve(false,'İkinci dokunuş çok geç!');return}else{taps++;confirmAt=holdAt+900}}else{taps++;if(taps>current.target){resolve(false,'Gereğinden fazla bastın!');return}if(taps===current.target)confirmAt=holdAt+900}el.sub.textContent=`DOKUNUŞ: ${taps}`;tone(530,.065,'sine',.045)}
+function onUp(evt){if(((evt && evt.type)==='pointerup'||(evt && evt.type)==='pointercancel')&&(current && current.kind)==='hold'&&pressing)evt.preventDefault();el.btn.classList.remove('pressed');if(!running||paused||finished||!current)return;if(current.kind==='hold'&&pressing){if(now()-holdAt<1000)resolve(false,'1 saniye dolmadan bıraktın!');else resolve(true)}pressing=false}
+// WebKit: use Pointer Events when supported and Touch Events when not.
+// Installing both unconditionally would count a single tap twice.
+if(window.PointerEvent){
+  el.btn.addEventListener('pointerdown',onDown, {passive:false});
+  window.addEventListener('pointerup',onUp, {passive:false});
+  window.addEventListener('pointercancel',onUp, {passive:false});
+}else if('ontouchstart' in window){
+  el.btn.addEventListener('touchstart',onDown, {passive:false});
+  window.addEventListener('touchend',onUp, {passive:false});
+  window.addEventListener('touchcancel',onUp, {passive:false});
+}else{
+  el.btn.addEventListener('mousedown',onDown);
+  window.addEventListener('mouseup',onUp);
+}
+el.btn.addEventListener('contextmenu',function(event){event.preventDefault()});
+document.addEventListener('keydown',e=>{if((e.code==='Space'||e.code==='Enter')&&!e.repeat&&el.overlay.hidden&&![el.sound,el.pause].includes(document.activeElement)){e.preventDefault();onDown()}});document.addEventListener('keyup',e=>{if((e.code==='Space'||e.code==='Enter')&&el.overlay.hidden){e.preventDefault();onUp()}});
+function modal(which){el.overlay.hidden=false;el.featureGrid.hidden=which!=='start';el.endGrid.hidden=!['win','loss'].includes(which);el.endReason.hidden=!['win','loss'].includes(which);el.secondary.hidden=which!=='pause';el.modalPill.textContent=which==='win'?'100 / 100 · EFSANE!':which==='loss'?'OYUN BİTTİ':which==='pause'?'DURAKLATILDI':'v1.5 · KARMA SORULAR';el.modalIcon.textContent=which==='win'?'🏆':which==='loss'?'☠':which==='pause'?'⏸':'⚡';el.modalTitle.innerHTML=which==='win'?'100 SEVİYE <span>BİTTİ!</span>':which==='loss'?'OYUN <span>BİTTİ!</span>':which==='pause'?'OYUN <span>DURDU</span>':'BAS<span>MA!</span>';el.modalText.textContent=which==='win'?'100 seviyenin tamamını geçtin. Bundan daha zorunu tasarlamamız gerekecek!':which==='loss'?'Dikkat bir an dağıldı! İstersen en baştan bir daha dene.':which==='pause'?'Zaman durdu. İstediğinde kaldığın seviyeden devam et.':'100 tur, tek karma soru havuzu! 1–10: 10 sn, 11–20: 8,5 sn, 21–100: 7,5 sn. Tek hakkın var!';el.action.textContent=which==='pause'?'DEVAM ET ▶':which==='start'?'OYUNA BAŞLA ↗':'YENİDEN BAŞLA ↗';if(['win','loss'].includes(which)){el.finalScore.textContent=score.toLocaleString('tr-TR');el.finalLevel.textContent=cleared;el.endReason.textContent=which==='win'?'Mükemmel! 100 seviyeyi başarıyla tamamladın.':`Son tur: ${level}. ${el.feedback.textContent||'Hatalı hamle.'}${(current && current.why)?'  💡 '+current.why:''}`}try{el.action.focus({preventScroll:true})}catch(_){el.action.focus()}}
+function restart(){clearTimeout(nextTimeout);cancelAnimationFrame(frame);score=0;life=1;level=0;cleared=0;streak=0;confirmAt=0;lastTaps=null;lastDecision=null;debugTypes=[];usedTemplates.clear();previousCategory='';previousTopic='';previousGroup='';previousTwoCategories=[];categoryUse={};running=true;paused=false;finished=false;el.overlay.hidden=true;el.pause.textContent='Ⅱ';newRound()}
+function endGame(reason){running=false;paused=false;finished=true;cancelAnimationFrame(frame);modal(reason)}
+function togglePause(){if(!running)return;if(!paused){paused=true;pausedAt=now();clearTimeout(nextTimeout);cancelAnimationFrame(frame);el.pause.textContent='▶';modal('pause')}else{paused=false;const pauseDuration=now()-pausedAt;started+=pauseDuration;if(confirmAt)confirmAt+=pauseDuration;el.pause.textContent='Ⅱ';el.overlay.hidden=true;if(finished){nextTimeout=setTimeout(()=>{if(life<=0)endGame('loss');else if(level>=100&&lastRoundPassed)endGame('win');else{if(level>=100)level=99;newRound()}},180)}else frame=requestAnimationFrame(tick)}}
+el.action.addEventListener('click',()=>{if(paused)togglePause();else restart()});el.secondary.addEventListener('click',restart);el.pause.addEventListener('click',()=>{if(running)togglePause();else modal('start')});el.sound.addEventListener('click',()=>{soundOn=!soundOn;el.sound.textContent=soundOn?'♫':'♪̸';el.sound.setAttribute('aria-label',soundOn?'Sesi kapat':'Sesi aç');if(soundOn)tone(680,.10,'sine',.09)});document.addEventListener('visibilitychange',()=>{if(document.hidden&&running&&!paused)togglePause()});window.addEventListener('pagehide',()=>{if(running&&!paused)togglePause()});
+// Lightweight local-only game: no external assets, requests or analytics.
+stats();draw(duration);
+})();
+</script>
+</body>
+</html>
